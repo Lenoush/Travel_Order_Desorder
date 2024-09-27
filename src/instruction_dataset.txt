@@ -1,0 +1,16 @@
+You will probably not find any existing dataset, and it is your job to build a training set for the
+NLP component (as well as a test set). 
+
+Be careful to include various kinds of trash texts, and more important that real orders ex-
+plore the variety of grammatical structures.
+
+As every person write differently, you will get a much wider dataset with more diversity if you do
+it collectively, on any collaborative media (Teams, Discord, Github, ...).
+
+On the other hand, the dataset timetables.csv, used for the pathfinder, is given to you at the start
+of the project. So you can evaluate the performance of your algorithm as you build it.
+
+For the sake of simplicity, you can assume that changes do not cost any additional time (duration
+from A to C through B = duration from A to B + duration from B to C).
+
+You may also use SNCF open data information to have town names instead of station names.
