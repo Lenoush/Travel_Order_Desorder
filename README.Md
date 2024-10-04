@@ -19,3 +19,8 @@ Avec Black and Ruff
 black path_file.py 
 ruff check path_file.py 
 ```
+## Authors 
+Léna Oudjman : Lenoush
+Gabrielle : Gabrielle-F
+Thomas Chevalier : TooikLeChevalier
+Mathias : 
