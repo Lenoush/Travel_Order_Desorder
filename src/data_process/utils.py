@@ -37,7 +37,7 @@ def write_data_to_csv(data: list[str], filename: str = Dataset) -> None:
             for word in phrase.split():
                 stripped_word = word.strip(".,;!?")
                 if stripped_word in ["X", "Y", "C"]:
-                    random_word = get_random_word_from_file(SNCF_gare)
+                    random_word = get_random_word_from_file(SNCF_gare).lower()
                     phrase = phrase.replace(word, random_word)
                     if stripped_word == "X":
                         reponse[0] = random_word
