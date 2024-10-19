@@ -1,4 +1,9 @@
 requests
 pandas
 
+# Style
+pre-commit
+black==24.8.0 
+ruff==0.6.8
+
 spacy 
