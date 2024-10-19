@@ -45,7 +45,7 @@ class EntityEvaluator:
             else:
                 lemmatized.append(f" {token.text}")
 
-        return ''.join(lemmatized).strip()
+        return "".join(lemmatized).strip()
 
     def est_une_question(self, phrase: str) -> bool:
         """
@@ -58,8 +58,17 @@ class EntityEvaluator:
             bool: True if the phrase is a question, otherwise False.
         """
         doc = self.model(phrase)
-        mots_interrogatifs = ['qui', 'quoi', 'où', 'quand', 'comment', 'pourquoi', 'lequel', 'faut-il']
-        return any(token.lemma_ in mots_interrogatifs or '?' in phrase for token in doc)
+        mots_interrogatifs = [
+            "qui",
+            "quoi",
+            "où",
+            "quand",
+            "comment",
+            "pourquoi",
+            "lequel",
+            "faut-il",
+        ]
+        return any(token.lemma_ in mots_interrogatifs or "?" in phrase for token in doc)
 
     def evaluate_without_rules(self) -> None:
         """
@@ -102,7 +111,12 @@ class EntityEvaluator:
                         index = list_phrase.index(ent.text)
 
                         # Check preceding word for exclusion criteria
-                        if index > 0 and list_phrase[index - 1] in ["nommer", "appeler", "surmonmer", "s'appeler"]:
+                        if index > 0 and list_phrase[index - 1] in [
+                            "nommer",
+                            "appeler",
+                            "surmonmer",
+                            "s'appeler",
+                        ]:
                             ent.label_ = "OTHER"
                             self.corriger += 1
                             continue
@@ -141,8 +155,8 @@ class EntityEvaluator:
 def main():
     # Read data from CSV
     df = pd.read_csv(Valid)
-    phrases = df['Phrase'].tolist()
-    responses = df['Reponse'].tolist()
+    phrases = df["Phrase"].tolist()
+    responses = df["Reponse"].tolist()
 
     # Initialize evaluator
     evaluator = EntityEvaluator(phrases, responses)
