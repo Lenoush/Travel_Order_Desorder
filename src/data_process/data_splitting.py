@@ -1,6 +1,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+
 class DatasetSplitter:
     """
     A class to split a dataset into training, validation, and test sets and save them as CSV files.
@@ -11,15 +12,15 @@ class DatasetSplitter:
         Path to the dataset file.
     random_state : int
         Seed to control the randomization of the data splitting.
-    
+
     Methods:
     --------
     load_data() -> None:
         Loads the dataset and extracts the 'Phrase' and 'Reponse' columns.
-    
+
     split_data() -> None:
         Splits the dataset into training, validation, and test sets with a 70-15-15 ratio.
-    
+
     save_data(train_file: str, val_file: str, test_file: str) -> None:
         Saves the split data into separate CSV files for training, validation, and test sets.
     """
@@ -51,8 +52,8 @@ class DatasetSplitter:
         Loads the dataset from the specified path and extracts the 'Phrase' and 'Reponse' columns.
         """
         df: pd.DataFrame = pd.read_csv(self.dataset_path)
-        self.phrases = df['Phrase'].tolist()
-        self.responses = df['Reponse'].tolist()
+        self.phrases = df["Phrase"].tolist()
+        self.responses = df["Reponse"].tolist()
 
     def split_data(self) -> None:
         """
@@ -67,7 +68,12 @@ class DatasetSplitter:
             X_test, y_test, test_size=0.5, random_state=self.random_state
         )
 
-    def save_data(self, train_file: str = 'data/train_dataset.csv', val_file: str = 'data/valid_dataset.csv', test_file: str = 'data/test_dataset.csv') -> None:
+    def save_data(
+        self,
+        train_file: str = "data/train_dataset.csv",
+        val_file: str = "data/valid_dataset.csv",
+        test_file: str = "data/test_dataset.csv",
+    ) -> None:
         """
         Saves the split data into separate CSV files for training, validation, and test sets.
 
@@ -81,22 +87,23 @@ class DatasetSplitter:
             Path to save the test data (default is 'data/test_dataset.csv').
         """
         # Save training set
-        X_train_df: pd.DataFrame = pd.DataFrame(self.X_train, columns=['Phrase'])
-        X_train_df['Reponse'] = self.y_train
+        X_train_df: pd.DataFrame = pd.DataFrame(self.X_train, columns=["Phrase"])
+        X_train_df["Reponse"] = self.y_train
         X_train_df.to_csv(train_file, index=False)
 
         # Save validation set
-        X_val_df: pd.DataFrame = pd.DataFrame(self.X_val, columns=['Phrase'])
-        X_val_df['Reponse'] = self.y_val
+        X_val_df: pd.DataFrame = pd.DataFrame(self.X_val, columns=["Phrase"])
+        X_val_df["Reponse"] = self.y_val
         X_val_df.to_csv(val_file, index=False)
 
         # Save test set
-        X_test_df: pd.DataFrame = pd.DataFrame(self.X_test, columns=['Phrase'])
-        X_test_df['Reponse'] = self.y_test
+        X_test_df: pd.DataFrame = pd.DataFrame(self.X_test, columns=["Phrase"])
+        X_test_df["Reponse"] = self.y_test
         X_test_df.to_csv(test_file, index=False)
 
+
 if __name__ == "__main__":
-    dataset = DatasetSplitter(dataset_path='data/dataset.csv')
+    dataset = DatasetSplitter(dataset_path="data/dataset.csv")
     dataset.load_data()
     dataset.split_data()
     dataset.save_data()

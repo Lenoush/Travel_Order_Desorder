@@ -2,12 +2,15 @@ import speech_recognition as sr
 import threading
 import keyboard
 
+
 def stop_listening(recognizer, source):
     print("Fin de l'enregistrement.")
     recognizer.stop_listening()
 
+
 def on_key_press(key_pressed):
     key_pressed[0] = True
+
 
 # Fonction pour écouter et transcrire
 def listen_for_audio(duration=10):
@@ -41,4 +44,5 @@ def listen_for_audio(duration=10):
     except sr.RequestError as e:
         print(f"Erreur lors de la requête : {e}")
 
-listen_for_audio() 
+
+listen_for_audio()

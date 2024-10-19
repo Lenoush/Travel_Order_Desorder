@@ -16,17 +16,17 @@ y_pred = []
 good = 0
 bad = 0
 
-valid_dataset = SpacyNERTrainer.load_data(self,Valid)
+valid_dataset = SpacyNERTrainer.load_data(self, Valid)
 
 # Évaluer le modèle sur les données de validation
 for phrase, reponse in valid_dataset:
     doc = trained_model(phrase)
     entities_pred = [(ent.start_char, ent.end_char, ent.label_) for ent in doc.ents]
 
-    y_true.append(reponse['entities'])
+    y_true.append(reponse["entities"])
     y_pred.append(entities_pred)
 
-    if entities_pred != reponse['entities']:
+    if entities_pred != reponse["entities"]:
         bad += 1
     else:
         good += 1
@@ -35,4 +35,3 @@ for phrase, reponse in valid_dataset:
 total = good + bad
 print(f"Correct : {(good / total) * 100:.2f}%")
 print(f"Incorrect : {(bad / total) * 100:.2f}%")
-

@@ -5,6 +5,7 @@ from spacy.training import Example
 from typing import List, Tuple, Dict
 from config import Output_model
 
+
 class SpacyNERTrainer:
     """
     A class to train a Named Entity Recognition (NER) model using spaCy.
@@ -15,7 +16,7 @@ class SpacyNERTrainer:
         The training data consisting of phrases and their associated entities.
     nlp : spacy.language.Language
         The spaCy language model.
-    
+
     Methods:
     --------
     load_data(train_file: str) -> None:
@@ -47,17 +48,18 @@ class SpacyNERTrainer:
         """
         df_train: pd.DataFrame = pd.read_csv(train_file)
 
-        X_train: List[str] = df_train['Phrase'].to_list()
-        y_train: List[str] = df_train['Reponse'].to_list()
+        X_train: List[str] = df_train["Phrase"].to_list()
+        y_train: List[str] = df_train["Reponse"].to_list()
 
         for phrase, response in zip(X_train, y_train):
             entities: List[Tuple[int, int, str]] = []
-            for ent in response.split(':'):
+            for ent in response.split(":"):
                 start_char = phrase.find(ent)
                 end_char = start_char + len(ent)
-                if start_char != -1:  
+                if start_char != -1:
                     entities.append((start_char, end_char, ent))
-                else : entities.append((0, 0, ent))
+                else:
+                    entities.append((0, 0, ent))
             self.train_data.append((phrase, {"entities": entities}))
 
         return self.train_data
@@ -92,7 +94,9 @@ class SpacyNERTrainer:
                     for text, annot in zip(texts, annotations):
                         doc = self.nlp.make_doc(text)
                         example = Example.from_dict(doc, annot)
-                        self.nlp.update([example], drop=0.1, sgd=optimizer, losses=losses)
+                        self.nlp.update(
+                            [example], drop=0.1, sgd=optimizer, losses=losses
+                        )
                 print(f"Iteration {i + 1}, Losses: {losses}")
 
         return self.nlp
@@ -109,8 +113,9 @@ class SpacyNERTrainer:
         self.nlp.to_disk(output_dir)
         print(f"Model saved to {output_dir}")
 
+
 if __name__ == "__main__":
     trainer = SpacyNERTrainer()
     trainer.load_data(train_file="data/train_dataset.csv")
     trained_model = trainer.train_spacy(iterations=100)
-    trainer.save_model(output_dir= Output_model + "model_spacy/small/test1.model")
+    trainer.save_model(output_dir=Output_model + "model_spacy/small/test1.model")
