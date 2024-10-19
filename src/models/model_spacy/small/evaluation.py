@@ -1,6 +1,4 @@
-import pandas as pd
 import spacy
-from sklearn.metrics import precision_score, recall_score, f1_score
 from config import Output_model, Valid
 from src.models.model_spacy.small.trainning import SpacyNERTrainer
 
@@ -16,7 +14,7 @@ y_pred = []
 good = 0
 bad = 0
 
-valid_dataset = SpacyNERTrainer.load_data(self, Valid)
+valid_dataset = SpacyNERTrainer.load_data(Valid)
 
 # Évaluer le modèle sur les données de validation
 for phrase, reponse in valid_dataset:
