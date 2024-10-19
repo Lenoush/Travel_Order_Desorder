@@ -27,9 +27,7 @@ def listen_for_audio(duration=10):
             threading.Timer(duration, stop_event.set).start()
 
         def check_for_keyboard():
-            key_pressed = [False]
             while not stop_event.is_set():
-                # if keyboard.on_press(lambda event: on_key_press(key_pressed)):
                 if keyboard.is_pressed("space"):
                     stop_event.set()
 
