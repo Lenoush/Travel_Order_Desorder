@@ -20,11 +20,17 @@ Test = "path_you_want.csv"
 Toujours push dans Dev
 
 ## Style
-Avec Black and Ruff 
+Ce projet utilise `pre-commit` pour automatiser l'application de `black` et `ruff` à chaque commit.  
+Cela garantit que le code respecte les normes de style définies.  
+
+### Manuellement : 
 ```
 black path_file.py 
 ruff check path_file.py 
 ```
+### Avec pre-commit : 
+Lorsque vous faites un commit, pre-commit exécutera automatiquement black et ruff sur les fichiers modifiés.  
+Si des problèmes sont détectés, vous devrez les corriger avant que le commit ne soit accepté. ( donc refaire git add . etc )  
 
 ## Authors 
 Léna Oudjman : Lenoush  
