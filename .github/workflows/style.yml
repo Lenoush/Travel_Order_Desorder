@@ -1,0 +1,32 @@
+name: Style Checks
+
+on:
+    push:
+      branches: [ "dev", "main" ]
+    pull_request:
+      branches: [ "dev" ]
+
+jobs:
+  style-check:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install black ruff
+
+    - name: Black Check
+      shell: bash
+      run: black . --diff --color --check
+
+    - name: Ruff Check
+      shell: bash
+      run: ruff check src
