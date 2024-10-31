@@ -55,6 +55,15 @@ data_question = [
     "Est-ce que le bus de X s'arrête à C avant d'arriver à Y ?",
 ]
 
+data_direct = [
+    "X Y",
+    "X , Y",
+    "X ; Y.",
+    "X / Y",
+    "X - Y",
+    "X _ Y",
+]
+
 data_error = [
     "Je vais à X. ",
     "Je pars pour X. ",
@@ -66,4 +75,46 @@ data_error = [
     "Je m'en vais à X ce week-end.",
     "Je vais découvrir X. ",
     "Je suis en chemin pour X. ",
+]
+
+data_unique = [
+    "Je prends le premier train qui part de X et termine son trajet à Y en fin d'après-midi.",
+    "Après être parti de X, je fais une courte escale à Z avant de finalement rejoindre Y.",
+    "Mon itinéraire commence à X et, sans correspondance, m'amène directement à Y où je passerai la nuit.",
+    "Je voyage de X à Y en avion, avec un court transit à C pour changer de vol.",
+    "Depuis X, je prends un taxi jusqu'à C, où un train m'attend pour m'amener à Y.",
+    "Mon trajet me fait passer par X, puis je prends un vélo jusqu'à Y.",
+    "Je prends le bus à X, il fait une correspondance à C, et je termine à Y avec une magnifique vue.",
+    "Je monte dans le métro à X, je change de ligne à C et termine mon trajet à Y.",
+    "Le ferry part de X en soirée, s'arrête à C, et arrive à Y au lever du soleil.",
+    "Mon trajet inclut une correspondance inattendue à C après avoir quitté X, et je termine à Y.",
+    "Je prends un vol de X, change à C, puis arrive à Y où je retrouve des amis.",
+    "Depuis X, je prends un taxi jusqu'à l'aéroport, où je prends un avion pour Y.",
+    "Je commence mon trajet en train depuis X, fais une correspondance à C, et termine à Y juste avant le coucher du soleil.",
+    "Mon voyage m'emmène de X à Y, avec un arrêt obligatoire à C pour un contrôle douanier.",
+    "Je pars de X en matinée et termine mon voyage à Y en passant par plusieurs arrêts.",
+]
+
+
+ville_sans_gare = [
+    "Espelett",
+    "Beynac-et-Cazenac",
+    "Saint-Rémy-de-Provence",
+    "La Bastide-Clairence",
+    "Rocamadour",
+    "Éze",
+    "Castelnau-de-Montmiral",
+    "Cargèse",
+    "Domme",
+    "Bormes-les-Mimosas",
+    "Le Touquet",
+    "Giverny",
+    "Honfleur",
+    "Sarlat-la-Canéda",
+    "La Roche-Guyon",
+    "Mimizan",
+    "Gordes",
+    "Saint-Paul-de-Vence",
+    "Lourmarin",
+    "Collioure",
 ]
