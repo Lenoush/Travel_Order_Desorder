@@ -3,7 +3,7 @@ import pandas as pd
 from spacy.util import minibatch, compounding
 from spacy.training import Example
 from typing import List, Tuple, Dict
-from config import Output_model
+from config import Output_model, Train
 
 
 class SpacyNERTrainer:
@@ -116,6 +116,6 @@ class SpacyNERTrainer:
 
 if __name__ == "__main__":
     trainer = SpacyNERTrainer()
-    trainer.load_data(train_file="data/train_dataset.csv")
+    trainer.load_data(train_file=Train)
     trained_model = trainer.train_spacy(iterations=100)
     trainer.save_model(output_dir=Output_model + "model_spacy/small/test1.model")
