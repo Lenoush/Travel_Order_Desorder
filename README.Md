@@ -17,14 +17,9 @@ Test = "path_you_want.csv"
 ```
 
 ## Data
-Pour obtenir le dataset
+Pour obtenir le dataset complet , SNCF , et les splits dataset :
 ````
 python src/data_process/build_dataset.py
-````
-
-Pour Split le dataset en train, valid et test
-````
-python /src/data_process/data_splitting.py
 ````
 
 ## Branch 
@@ -52,7 +47,9 @@ Mathias :
 
 ## Ameliorations retenues 
 - Mettre le nom de ville en minuscule dans l'input => le model ne reverrai pas uniquement les mots avec une majuscule. 
-- Rajouter des phrases entrainements avec des villes qui n'ont pas de gare sncf.
+- Rajouter dans le dataset des phrases d'entrainements avec des villes qui n'ont pas de gare sncf.
+- Rajouter dans le dataset des phrases d'entrainements "ville-ville".
+- Rajouter dans le dataset Valid et Test des phrases uniques qui ne sont pas dans Train.
 - Pourquoi ce voice recognition ? 
 - Pour quoi ce model ? => Comparaison en cours. 
 - Bien afficher toutes les erreurs : 
