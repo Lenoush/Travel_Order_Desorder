@@ -13,24 +13,14 @@ class EntityEvaluator:
         """
         Initializes the EntityEvaluator.
         """
-
         self.phrases = phrases
         self.responses = responses
         self.model = spacy.load("fr_core_news_sm")
-        self.good = 0
-        self.bad = 0
-        self.corriger = 0
-        self.symbols = ["-", "'", "`", "`", "‘", "’", "'", "´", "ˋ"]
+        self.symbols = ["-", "'", "`", "‘", "’", "´", "ˋ"]
 
     def lemmatize_phrase(self, phrase: str) -> str:
         """
         Lemmatizes the input phrase.
-
-        Args:
-            phrase (str): Input phrase to lemmatize.
-
-        Returns:
-            str: Lemmatized phrase.
         """
         doc = self.model(phrase)
         lemmatized = []
@@ -41,23 +31,16 @@ class EntityEvaluator:
             elif token.text in self.symbols:
                 lemmatized.append(token.text)
             elif len(lemmatized) > 0 and lemmatized[-1] in self.symbols:
-                lemmatized.append(f"{token.text}")
+                lemmatized.append(token.text)
             else:
                 lemmatized.append(f" {token.text}")
 
         return "".join(lemmatized).strip()
 
-    def est_une_question(self, phrase: str) -> bool:
+    def is_question(self, phrase: str) -> bool:
         """
         Determines if the given phrase is a question.
-
-        Args:
-            phrase (str): Input phrase.
-
-        Returns:
-            bool: True if the phrase is a question, otherwise False.
         """
-        doc = self.model(phrase)
         mots_interrogatifs = [
             "qui",
             "quoi",
@@ -68,88 +51,94 @@ class EntityEvaluator:
             "lequel",
             "faut-il",
         ]
-        return any(token.lemma_ in mots_interrogatifs or "?" in phrase for token in doc)
+        return (
+            any(token.lemma_ in mots_interrogatifs for token in self.model(phrase))
+            or "?" in phrase
+        )
+
+    def is_first_name(self, phrase: str) -> bool:
+        """
+        Determines if the given phrase contains a first name.
+        """
+        doc = self.model(phrase)
+        for index in range(1, len(doc)):
+            if doc[index].label_ == "LOC" and doc[index - 1].text in [
+                "s'appelle",
+                "appelle",
+                "nomme",
+                "surmonme",
+            ]:
+                return True
+        return False
+
+    def has_less_than_2_locs(self, phrase: str) -> bool:
+        """
+        Determines if the given phrase contains less than 2 LOC entities.
+        """
+        doc = self.model(phrase)
+        return len([ent for ent in doc.ents if ent.label_ == "LOC"]) < 2
+
+    def is_LOC_egal_RER(self, ent) -> bool:
+        """
+        Determines if the given entity is a LOC entity and contains "RER".
+        """
+        return ent.label_ == "LOC" and "RER" in ent.text
 
     def evaluate_without_rules(self) -> None:
         """
         Evaluates entity recognition without using any custom rules.
         """
-        self.good = 0
-        self.bad = 0
+        correct = 0
+        total = len(self.phrases)
 
         for phrase, response in zip(self.phrases, self.responses):
             doc = self.model(phrase)
-            for ent in doc.ents:
-                if ent.label_ == "LOC" and ent.text in response:
-                    self.good += 1
-                elif ent.label_ == "LOC" and ent.text not in response:
-                    self.bad += 1
+            all_LOC = [ent.text for ent in doc.ents if ent.label_ == "LOC"]
 
-        total = len(self.phrases)
+            if response == "Error":
+                if len(all_LOC) < 2:
+                    correct += 1
+            else:
+                expected = response.split(":")
+                if len(all_LOC) == len(expected):
+                    if all(loc in expected for loc in all_LOC):
+                        correct += 1
+
         print("Without rules")
-        print(f"Correct: {(self.good / total) * 100:.2f}%")
-        print(f"Incorrect: {(self.bad / total) * 100:.2f}%")
+        accuracy = (correct / total) * 100
+        print(f"Accuracy: {accuracy:.2f}%")
 
     def evaluate_with_rules(self) -> None:
         """
         Evaluates entity recognition with custom rules.
         """
-        self.good = 0
-        self.bad = 0
-        self.corriger = 0
-        lemmatized_phrases = []
+        correct = 0
+        total = len(self.phrases)
 
         for phrase, response in zip(self.phrases, self.responses):
-            doc = self.model(phrase)
             lemmatized_phrase = self.lemmatize_phrase(phrase)
-            lemmatized_phrases.append(lemmatized_phrase)
-            list_phrase = lemmatized_phrase.split()
+            doc = self.model(lemmatized_phrase)
+            all_LOC = [ent for ent in doc.ents if ent.label_ == "LOC"]
 
-            for ent in doc.ents:
-                if ent.label_ == "LOC" and ent.text not in response:
-                    try:
-                        index = list_phrase.index(ent.text)
+            # Appliquer les règles
+            if self.has_less_than_2_locs(lemmatized_phrase):
+                all_LOC = []  # On considère qu'il n'y a pas d'entités valides
 
-                        # Check preceding word for exclusion criteria
-                        if index > 0 and list_phrase[index - 1] in [
-                            "nommer",
-                            "appeler",
-                            "surmonmer",
-                            "s'appeler",
-                        ]:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
+            # Modifier l'étiquette si l'entité est un RER
+            all_LOC = [ent for ent in all_LOC if not self.is_LOC_egal_RER(ent)]
 
-                        # Exclude if the entity contains "RER"
-                        if "RER" in ent.text:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
+            if response == "Error":
+                if len(all_LOC) < 2:
+                    correct += 1
+            else:
+                expected = response.split(":")
+                if len(all_LOC) == len(expected):
+                    if all(loc in expected for loc in all_LOC):
+                        correct += 1
 
-                        # Exclude if the phrase is a question
-                        if self.est_une_question(phrase):
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
-
-                        # Exclude if there's only one LOC in the phrase
-                        if len([e for e in doc.ents if e.label_ == "LOC"]) == 1:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
-
-                        self.bad += 1  # Entity is not considered valid
-                    except ValueError:
-                        self.bad += 1
-                elif ent.label_ == "LOC" and ent.text in response:
-                    self.good += 1
-
-        total = self.good + self.bad
+        accuracy = (correct / total) * 100
         print("With rules")
-        print(f"Correct: {(self.good / total) * 100:.2f}%")
-        print(f"Corrected: {(self.corriger / total) * 100:.2f}%")
-        print(f"Incorrect: {(self.bad / total) * 100:.2f}%")
+        print(f"Accuracy: {accuracy:.2f}%")
 
 
 def main():
@@ -163,6 +152,7 @@ def main():
 
     # Evaluate without rules
     evaluator.evaluate_without_rules()
+    print("\n")
 
     # Evaluate with rules
     evaluator.evaluate_with_rules()

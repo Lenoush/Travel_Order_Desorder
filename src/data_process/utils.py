@@ -3,7 +3,7 @@ import pandas as pd
 import csv
 import random
 from typing import List
-from config import SNCF_gare, Output_model
+from config import SNCF_gare
 from data.data_need import ville_sans_gare
 
 
@@ -90,7 +90,7 @@ def merge_datasets(*datasets: List[str]) -> List[str]:
     return merged_data
 
 
-def write_data_to_csv(data: List[List[str]], filename: str = Output_model) -> None:
+def write_data_to_csv(data: List[List[str]], filename: str) -> None:
     """
     Writes the processed phrases and corresponding responses to a CSV file.
     """
@@ -101,7 +101,7 @@ def write_data_to_csv(data: List[List[str]], filename: str = Output_model) -> No
         writer.writerows(data)
 
 
-def load_data(dataset_path) -> None:
+def load_data(dataset_path: str) -> tuple[List[str], List[str]]:
     """
     Loads the dataset from the specified path and extracts the 'Phrase' and 'Reponse' columns.
     """
