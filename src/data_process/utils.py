@@ -90,7 +90,7 @@ def merge_datasets(*datasets: List[str]) -> List[str]:
     return merged_data
 
 
-def write_data_to_csv(data: List[List[str]], filename: str = "output.csv") -> None:
+def write_data_to_csv(data: List[List[str]], filename: str) -> None:
     """
     Writes the processed phrases and corresponding responses to a CSV file.
     """
@@ -101,7 +101,7 @@ def write_data_to_csv(data: List[List[str]], filename: str = "output.csv") -> No
         writer.writerows(data)
 
 
-def load_data(dataset_path) -> None:
+def load_data(dataset_path: str) -> tuple[List[str], List[str]]:
     """
     Loads the dataset from the specified path and extracts the 'Phrase' and 'Reponse' columns.
     """
