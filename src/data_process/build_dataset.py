@@ -14,7 +14,7 @@ from data.data_need import (
     data_direct,
     data_unique,
 )
-from config import Dataset
+from config import Dataset, Train, Test, Valid
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -94,9 +94,9 @@ class BuildDataset:
 
     def save_data(
         self,
-        train_file: str = "data/train_dataset.csv",
-        val_file: str = "data/valid_dataset.csv",
-        test_file: str = "data/test_dataset.csv",
+        train_file: str = Train,
+        val_file: str = Valid,
+        test_file: str = Test,
     ) -> None:
         """
         Saves the split data into separate CSV files for training, validation, and test sets.
@@ -123,7 +123,7 @@ class BuildDataset:
 
 
 if __name__ == "__main__":
-    dataset = BuildDataset(dataset_path="data/dataset.csv")
+    dataset = BuildDataset(dataset_path=Dataset)
     dataset.build()
     phrases, responses = load_data(dataset.dataset_path)
     dataset.split_data(phrases, responses)
