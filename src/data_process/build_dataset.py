@@ -14,7 +14,7 @@ from data.data_need import (
     data_direct,
     data_unique,
 )
-from config import Dataset, Train, Valid, Test
+from config import Dataset, Train, Test, Valid
 
 import pandas as pd
 from sklearn.model_selection import train_test_split

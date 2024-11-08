@@ -17,7 +17,7 @@ def get_random_word_from_file() -> str:
 
     with open(SNCF_gare, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file, delimiter=";")
-        words = [row["LIBELLE"] for row in reader if "LIBELLE" in row]
+        words = [row["LIBELLE"] for row in reader]
     words.extend(ville_sans_gare)
     return random.choice(words)
 
@@ -91,10 +91,11 @@ def replace_and_generate_error(dataset: List[str]) -> List[List[str]]:
     return processed_data
 
 
-def merge_datasets(*datasets: List[List[str]]) -> list[list[str]]:
+def merge_datasets(*datasets: List[str]) -> List[str]:
     """
     Merges multiple datasets into one.
     """
+
     merged_data = []
     for dataset in datasets:
         merged_data.extend(dataset)
@@ -102,7 +103,7 @@ def merge_datasets(*datasets: List[List[str]]) -> list[list[str]]:
     return merged_data
 
 
-def write_data_to_csv(data: List[List[str]], filename: str = "output.csv") -> None:
+def write_data_to_csv(data: List[List[str]], filename: str) -> None:
     """
     Writes the processed phrases and corresponding responses to a CSV file.
     """
