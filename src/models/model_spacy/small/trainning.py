@@ -57,9 +57,7 @@ class SpacyNERTrainer:
                 start_char = phrase.find(ent)
                 end_char = start_char + len(ent)
                 if start_char != -1:
-                    entities.append((start_char, end_char, ent))
-                else:
-                    entities.append((0, 0, ent))
+                    entities.append((start_char, end_char, "LOC"))
             self.train_data.append((phrase, {"entities": entities}))
 
         return self.train_data
@@ -78,6 +76,9 @@ class SpacyNERTrainer:
         spacy.language.Language
             The trained spaCy model.
         """
+        best_loss = float("inf")
+        best_model = None
+
         for _, annotations in self.train_data:
             for ent in annotations.get("entities"):
                 self.ner.add_label(ent[2])
@@ -85,7 +86,7 @@ class SpacyNERTrainer:
         # Disable other components of the pipeline to train only the NER
         other_pipes = [pipe for pipe in self.nlp.pipe_names if pipe != "ner"]
         with self.nlp.disable_pipes(*other_pipes):
-            optimizer = self.nlp.begin_training()
+            optimizer = self.nlp.resume_training()
             for i in range(iterations):
                 losses = {}
                 batches = minibatch(self.train_data, size=compounding(4.0, 32.0, 1.001))
@@ -99,9 +100,15 @@ class SpacyNERTrainer:
                         )
                 print(f"Iteration {i + 1}, Losses: {losses}")
 
-        return self.nlp
+                # Check if the current loss is the best
+                current_loss = sum(losses.values())
+                if current_loss < best_loss:
+                    best_loss = current_loss
+                    best_model = self.nlp  # Save the best model
 
-    def save_model(self, output_dir: str) -> None:
+        return best_model
+
+    def save_model(self, model_to_save, output_dir: str) -> None:
         """
         Saves the trained model to the specified directory.
 
@@ -110,7 +117,7 @@ class SpacyNERTrainer:
         output_dir : str
             The directory where the model will be saved.
         """
-        self.nlp.to_disk(output_dir)
+        model_to_save.to_disk(output_dir)
         print(f"Model saved to {output_dir}")
 
 
@@ -118,4 +125,7 @@ if __name__ == "__main__":
     trainer = SpacyNERTrainer()
     trainer.load_data(train_file=Train)
     trained_model = trainer.train_spacy(iterations=100)
-    trainer.save_model(output_dir=Output_model + "model_spacy/small/test1.model")
+    trainer.save_model(
+        model_to_save=trained_model,
+        output_dir=Output_model + "model_spacy/small/test1.model",
+    )

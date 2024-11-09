@@ -1,21 +1,17 @@
 import spacy
 import pandas as pd
-from typing import List
-from config import Valid
+from config import Valid, Output_model
+from src.data_process.utils import load_data
 
 
-class EntityEvaluator:
-    """
-    Class to evaluate named entity recognition (NER) using SpaCy, with options for applying custom rules.
-    """
+class Evaluators:
 
-    def __init__(self, phrases: List[str], responses: List[str]):
+    def __init__(self, data: pd.DataFrame, model: spacy):
         """
         Initializes the EntityEvaluator.
         """
-        self.phrases = phrases
-        self.responses = responses
-        self.model = spacy.load("fr_core_news_sm")
+        self.phrases, self.responses = load_data(data)
+        self.model = model
         self.symbols = ["-", "'", "`", "‘", "’", "´", "ˋ"]
 
     def lemmatize_phrase(self, phrase: str) -> str:
@@ -56,33 +52,9 @@ class EntityEvaluator:
             or "?" in phrase
         )
 
-    def is_first_name(self, phrase: str) -> bool:
-        """
-        Determines if the given phrase contains a first name.
-        """
+    def extract_cities(self, phrase):
         doc = self.model(phrase)
-        for index in range(1, len(doc)):
-            if doc[index].label_ == "LOC" and doc[index - 1].text in [
-                "s'appelle",
-                "appelle",
-                "nomme",
-                "surmonme",
-            ]:
-                return True
-        return False
-
-    def has_less_than_2_locs(self, phrase: str) -> bool:
-        """
-        Determines if the given phrase contains less than 2 LOC entities.
-        """
-        doc = self.model(phrase)
-        return len([ent for ent in doc.ents if ent.label_ == "LOC"]) < 2
-
-    def is_LOC_egal_RER(self, ent) -> bool:
-        """
-        Determines if the given entity is a LOC entity and contains "RER".
-        """
-        return ent.label_ == "LOC" and "RER" in ent.text
+        return [ent.text for ent in doc.ents if ent.label_ == "LOC"], doc
 
     def evaluate_without_rules(self) -> None:
         """
@@ -91,18 +63,16 @@ class EntityEvaluator:
         correct = 0
         total = len(self.phrases)
 
-        for phrase, response in zip(self.phrases, self.responses):
-            doc = self.model(phrase)
-            all_LOC = [ent.text for ent in doc.ents if ent.label_ == "LOC"]
+        for phrase, reponse in zip(self.phrases, self.responses):
+            predicted_cities, _ = self.extract_cities(phrase)
 
-            if response == "Error":
-                if len(all_LOC) < 2:
-                    correct += 1
+            if reponse == "Error":
+                expected_cities = []
             else:
-                expected = response.split(":")
-                if len(all_LOC) == len(expected):
-                    if all(loc in expected for loc in all_LOC):
-                        correct += 1
+                expected_cities = reponse.split(":")
+
+            if predicted_cities == expected_cities:
+                correct += 1
 
         print("Without rules")
         accuracy = (correct / total) * 100
@@ -115,26 +85,41 @@ class EntityEvaluator:
         correct = 0
         total = len(self.phrases)
 
-        for phrase, response in zip(self.phrases, self.responses):
+        for phrase, reponse in zip(self.phrases, self.responses):
             lemmatized_phrase = self.lemmatize_phrase(phrase)
-            doc = self.model(lemmatized_phrase)
-            all_LOC = [ent for ent in doc.ents if ent.label_ == "LOC"]
+            predicted_cities, doc = self.extract_cities(lemmatized_phrase)
+
+            # Remove si l'entité est un RER
+            for ville in predicted_cities:
+                if "RER" in ville:
+                    predicted_cities.remove(ville)
+                    continue
+                # Remove si le mot d'avant la ville est un verbe d'appel
+                index = lemmatized_phrase.find(ville)
+                if index > 0:
+                    words_before_city = lemmatized_phrase[:index].split()
+                    if words_before_city:
+                        last_word_before_city = words_before_city[-1]
+                        if last_word_before_city in ["appeler", "nommer", "surnommer"]:
+                            predicted_cities.remove(ville)
 
             # Appliquer les règles
-            if self.has_less_than_2_locs(lemmatized_phrase):
-                all_LOC = []  # On considère qu'il n'y a pas d'entités valides
+            if not predicted_cities:
+                predicted_cities = predicted_cities
+            elif len(predicted_cities) < 2:
+                predicted_cities = predicted_cities
 
-            # Modifier l'étiquette si l'entité est un RER
-            all_LOC = [ent for ent in all_LOC if not self.is_LOC_egal_RER(ent)]
-
-            if response == "Error":
-                if len(all_LOC) < 2:
-                    correct += 1
+            if reponse == "Error":
+                pass
             else:
-                expected = response.split(":")
-                if len(all_LOC) == len(expected):
-                    if all(loc in expected for loc in all_LOC):
-                        correct += 1
+                expected_cities = reponse.split(":")
+
+            if predicted_cities == expected_cities:
+                correct += 1
+            else:
+                # print(predicted_cities, expected_cities)
+                # print(phrase)
+                pass
 
         accuracy = (correct / total) * 100
         print("With rules")
@@ -142,13 +127,12 @@ class EntityEvaluator:
 
 
 def main():
-    # Read data from CSV
-    df = pd.read_csv(Valid)
-    phrases = df["Phrase"].tolist()
-    responses = df["Reponse"].tolist()
 
     # Initialize evaluator
-    evaluator = EntityEvaluator(phrases, responses)
+    # evaluator = Evaluators(Valid, spacy.load("fr_core_news_sm"))
+    evaluator = Evaluators(
+        Valid, spacy.load(Output_model + "model_spacy/small/test1.model")
+    )
 
     # Evaluate without rules
     evaluator.evaluate_without_rules()
