@@ -1,36 +1,22 @@
 import spacy
 import pandas as pd
-from typing import List
-from config import Valid
+from config import Valid, Output_model
+from src.data_process.utils import load_data
 
 
-class EntityEvaluator:
-    """
-    Class to evaluate named entity recognition (NER) using SpaCy, with options for applying custom rules.
-    """
+class Evaluators:
 
-    def __init__(self, phrases: List[str], responses: List[str]):
+    def __init__(self, data: pd.DataFrame, model: spacy):
         """
         Initializes the EntityEvaluator.
         """
-
-        self.phrases = phrases
-        self.responses = responses
-        self.model = spacy.load("fr_core_news_sm")
-        self.good = 0
-        self.bad = 0
-        self.corriger = 0
-        self.symbols = ["-", "'", "`", "`", "‘", "’", "'", "´", "ˋ"]
+        self.phrases, self.responses = load_data(data)
+        self.model = model
+        self.symbols = ["-", "'", "`", "‘", "’", "´", "ˋ"]
 
     def lemmatize_phrase(self, phrase: str) -> str:
         """
         Lemmatizes the input phrase.
-
-        Args:
-            phrase (str): Input phrase to lemmatize.
-
-        Returns:
-            str: Lemmatized phrase.
         """
         doc = self.model(phrase)
         lemmatized = []
@@ -41,23 +27,16 @@ class EntityEvaluator:
             elif token.text in self.symbols:
                 lemmatized.append(token.text)
             elif len(lemmatized) > 0 and lemmatized[-1] in self.symbols:
-                lemmatized.append(f"{token.text}")
+                lemmatized.append(token.text)
             else:
                 lemmatized.append(f" {token.text}")
 
         return "".join(lemmatized).strip()
 
-    def est_une_question(self, phrase: str) -> bool:
+    def is_question(self, phrase: str) -> bool:
         """
         Determines if the given phrase is a question.
-
-        Args:
-            phrase (str): Input phrase.
-
-        Returns:
-            bool: True if the phrase is a question, otherwise False.
         """
-        doc = self.model(phrase)
         mots_interrogatifs = [
             "qui",
             "quoi",
@@ -68,101 +47,96 @@ class EntityEvaluator:
             "lequel",
             "faut-il",
         ]
-        return any(token.lemma_ in mots_interrogatifs or "?" in phrase for token in doc)
+        return (
+            any(token.lemma_ in mots_interrogatifs for token in self.model(phrase))
+            or "?" in phrase
+        )
+
+    def extract_cities(self, phrase):
+        doc = self.model(phrase)
+        return [ent.text for ent in doc.ents if ent.label_ == "LOC"], doc
 
     def evaluate_without_rules(self) -> None:
         """
         Evaluates entity recognition without using any custom rules.
         """
-        self.good = 0
-        self.bad = 0
-
-        for phrase, response in zip(self.phrases, self.responses):
-            doc = self.model(phrase)
-            for ent in doc.ents:
-                if ent.label_ == "LOC" and ent.text in response:
-                    self.good += 1
-                elif ent.label_ == "LOC" and ent.text not in response:
-                    self.bad += 1
-
+        correct = 0
         total = len(self.phrases)
+
+        for phrase, reponse in zip(self.phrases, self.responses):
+            predicted_cities, _ = self.extract_cities(phrase)
+
+            if reponse == "Error":
+                expected_cities = []
+            else:
+                expected_cities = reponse.split(":")
+
+            if predicted_cities == expected_cities:
+                correct += 1
+
         print("Without rules")
-        print(f"Correct: {(self.good / total) * 100:.2f}%")
-        print(f"Incorrect: {(self.bad / total) * 100:.2f}%")
+        accuracy = (correct / total) * 100
+        print(f"Accuracy: {accuracy:.2f}%")
 
     def evaluate_with_rules(self) -> None:
         """
         Evaluates entity recognition with custom rules.
         """
-        self.good = 0
-        self.bad = 0
-        self.corriger = 0
-        lemmatized_phrases = []
+        correct = 0
+        total = len(self.phrases)
 
-        for phrase, response in zip(self.phrases, self.responses):
-            doc = self.model(phrase)
+        for phrase, reponse in zip(self.phrases, self.responses):
             lemmatized_phrase = self.lemmatize_phrase(phrase)
-            lemmatized_phrases.append(lemmatized_phrase)
-            list_phrase = lemmatized_phrase.split()
+            predicted_cities, doc = self.extract_cities(lemmatized_phrase)
 
-            for ent in doc.ents:
-                if ent.label_ == "LOC" and ent.text not in response:
-                    try:
-                        index = list_phrase.index(ent.text)
+            # Remove si l'entité est un RER
+            for ville in predicted_cities:
+                if "RER" in ville:
+                    predicted_cities.remove(ville)
+                    continue
+                # Remove si le mot d'avant la ville est un verbe d'appel
+                index = lemmatized_phrase.find(ville)
+                if index > 0:
+                    words_before_city = lemmatized_phrase[:index].split()
+                    if words_before_city:
+                        last_word_before_city = words_before_city[-1]
+                        if last_word_before_city in ["appeler", "nommer", "surnommer"]:
+                            predicted_cities.remove(ville)
 
-                        # Check preceding word for exclusion criteria
-                        if index > 0 and list_phrase[index - 1] in [
-                            "nommer",
-                            "appeler",
-                            "surmonmer",
-                            "s'appeler",
-                        ]:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
+            # Appliquer les règles
+            if not predicted_cities:
+                predicted_cities = predicted_cities
+            elif len(predicted_cities) < 2:
+                predicted_cities = predicted_cities
 
-                        # Exclude if the entity contains "RER"
-                        if "RER" in ent.text:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
+            if reponse == "Error":
+                pass
+            else:
+                expected_cities = reponse.split(":")
 
-                        # Exclude if the phrase is a question
-                        if self.est_une_question(phrase):
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
+            if predicted_cities == expected_cities:
+                correct += 1
+            else:
+                # print(predicted_cities, expected_cities)
+                # print(phrase)
+                pass
 
-                        # Exclude if there's only one LOC in the phrase
-                        if len([e for e in doc.ents if e.label_ == "LOC"]) == 1:
-                            ent.label_ = "OTHER"
-                            self.corriger += 1
-                            continue
-
-                        self.bad += 1  # Entity is not considered valid
-                    except ValueError:
-                        self.bad += 1
-                elif ent.label_ == "LOC" and ent.text in response:
-                    self.good += 1
-
-        total = self.good + self.bad
+        accuracy = (correct / total) * 100
         print("With rules")
-        print(f"Correct: {(self.good / total) * 100:.2f}%")
-        print(f"Corrected: {(self.corriger / total) * 100:.2f}%")
-        print(f"Incorrect: {(self.bad / total) * 100:.2f}%")
+        print(f"Accuracy: {accuracy:.2f}%")
 
 
 def main():
-    # Read data from CSV
-    df = pd.read_csv(Valid)
-    phrases = df["Phrase"].tolist()
-    responses = df["Reponse"].tolist()
 
     # Initialize evaluator
-    evaluator = EntityEvaluator(phrases, responses)
+    # evaluator = Evaluators(Valid, spacy.load("fr_core_news_sm"))
+    evaluator = Evaluators(
+        Valid, spacy.load(Output_model + "model_spacy/small/test1.model")
+    )
 
     # Evaluate without rules
     evaluator.evaluate_without_rules()
+    print("\n")
 
     # Evaluate with rules
     evaluator.evaluate_with_rules()

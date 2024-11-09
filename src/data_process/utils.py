@@ -64,9 +64,9 @@ def replace_and_generate_response(dataset: List[str]) -> List[List[str]]:
                     modified_phrase = modified_phrase.replace(word, random_word, 1)
                     if stripped_word == "X":
                         reponse[0] = random_word
-                    elif stripped_word == "Y":
-                        reponse.insert(1, random_word)
                     elif stripped_word == "C":
+                        reponse.insert(1, random_word)
+                    elif stripped_word == "Y":
                         reponse[-1] = random_word
             processed_data.append([modified_phrase, ":".join(filter(None, reponse))])
     return processed_data
