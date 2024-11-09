@@ -1,8 +1,11 @@
-import requests
-import pandas as pd
 import csv
+import os
 import random
-from typing import List
+from typing import List, Any
+
+import pandas as pd
+import requests
+
 from config import SNCF_gare
 from data.data_need import ville_sans_gare
 
@@ -25,9 +28,19 @@ def load_sncf_data() -> pd.DataFrame:
     and returns the data as a Pandas DataFrame.
     """
 
-    url = "https://ressources.data.sncf.com/explore/dataset/liste-des-gares/download/?format=csv&timezone=Europe/Berlin&use_labels_for_header=true"
+    url = ("https://ressources.data.sncf.com/explore/dataset/liste-des-gares/download/?format=csv&timezone=Europe"
+           "/Berlin&use_labels_for_header=true")
 
     response = requests.get(url)
+
+    # check master directory of file exist
+    if not os.path.exists(os.path.dirname(SNCF_gare)):
+        os.makedirs(os.path.dirname(SNCF_gare))
+    # if file does not exist create it
+    if not os.path.exists(SNCF_gare):
+        with open(SNCF_gare, "w"):
+            pass
+
     with open(SNCF_gare, "wb") as file:
         file.write(response.content)
     df = pd.read_csv(SNCF_gare)
@@ -101,7 +114,7 @@ def write_data_to_csv(data: List[List[str]], filename: str) -> None:
         writer.writerows(data)
 
 
-def load_data(dataset_path: str) -> tuple[List[str], List[str]]:
+def load_data(dataset_path) -> tuple[Any, Any]:
     """
     Loads the dataset from the specified path and extracts the 'Phrase' and 'Reponse' columns.
     """
