@@ -1,6 +1,3 @@
-import os
-import sys
-
 import spacy
 import pandas as pd
 from spacy.util import minibatch, compounding
