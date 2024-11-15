@@ -5,9 +5,32 @@ from typing import List, Any
 
 import pandas as pd
 import requests
+import re
 
 from config import SNCF_gare
 from data.data_need import ville_sans_gare
+
+
+def clean_word(word: str) -> str:
+    """
+    Cleans a word by removing any parentheses and leading/trailing whitespace.
+    """
+    # Remove any parentheses and leading/trailing whitespace
+    cleaned_word = re.sub(r"\s*\(.*?\)", "", word).strip()
+
+    # Remove any TGV word and the '-' character
+    cleaned_word = re.sub(r"(-?TGV-?)", "", cleaned_word).strip()
+
+    # Remove any digits
+    cleaned_word = re.sub(r"\d+", "", cleaned_word).strip()
+
+    # Add a hyphen between 'La' or 'Le' and the final word if they are separated by a space
+    # cleaned_word = re.sub(r"\b(La|Le)\s+(\w+)", r"\1-\2", cleaned_word)
+
+    # Remove any trailing 'TT' characters
+    cleaned_word = re.sub(r"TT$", "", cleaned_word).strip()
+
+    return cleaned_word
 
 
 def get_random_word_from_file() -> str:
@@ -17,9 +40,15 @@ def get_random_word_from_file() -> str:
 
     with open(SNCF_gare, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file, delimiter=";")
-        words = [row["LIBELLE"] for row in reader]
+        words = []
+        for row in reader:
+            cleaned_word = clean_word(row["LIBELLE"])
+            words.append(cleaned_word)
     words.extend(ville_sans_gare)
     return random.choice(words)
+
+
+get_random_word_from_file()
 
 
 def load_sncf_data() -> pd.DataFrame:
@@ -28,8 +57,10 @@ def load_sncf_data() -> pd.DataFrame:
     and returns the data as a Pandas DataFrame.
     """
 
-    url = ("https://ressources.data.sncf.com/explore/dataset/liste-des-gares/download/?format=csv&timezone=Europe"
-           "/Berlin&use_labels_for_header=true")
+    url = (
+        "https://ressources.data.sncf.com/explore/dataset/liste-des-gares/download/?format=csv&timezone=Europe"
+        "/Berlin&use_labels_for_header=true"
+    )
 
     response = requests.get(url)
 
@@ -54,13 +85,16 @@ def replace_and_generate_response(dataset: List[str]) -> List[List[str]]:
     """
     processed_data = []
     for phrase in dataset:
-        for _ in range(5):
+        for _ in range(20):
             reponse = [None, None, None]
             modified_phrase = phrase
+            words_add = []
             for word in modified_phrase.split():
                 stripped_word = word.strip(".,;!?")
                 if stripped_word in ["X", "Y", "C"]:
                     random_word = get_random_word_from_file().lower()
+                    while random_word in words_add:
+                        random_word = get_random_word_from_file().lower()
                     modified_phrase = modified_phrase.replace(word, random_word, 1)
                     if stripped_word == "X":
                         reponse[0] = random_word
@@ -68,6 +102,7 @@ def replace_and_generate_response(dataset: List[str]) -> List[List[str]]:
                         reponse.insert(1, random_word)
                     elif stripped_word == "Y":
                         reponse[-1] = random_word
+                    words_add.append(random_word)
             processed_data.append([modified_phrase, ":".join(filter(None, reponse))])
     return processed_data
 
@@ -79,7 +114,7 @@ def replace_and_generate_error(dataset: List[str]) -> List[List[str]]:
     """
     processed_data = []
     for phrase in dataset:
-        for _ in range(2):
+        for _ in range(20):
             reponse = ["Error"]
             modified_phrase = phrase
             for word in modified_phrase.split():

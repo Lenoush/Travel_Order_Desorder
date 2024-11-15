@@ -1,8 +1,10 @@
 import spacy
 import pandas as pd
+import sys
 from spacy.util import minibatch, compounding
 from spacy.training import Example
-from typing import List, Tuple, Dict
+from spacy.scorer import Scorer
+from typing import List, Tuple
 from config import Output_model, Train
 
 
@@ -32,9 +34,18 @@ class SpacyNERTrainer:
         Saves the trained model to the specified directory.
     """
 
-    def __init__(self):
-        self.train_data: List[Tuple[str, Dict[str, List[Tuple[int, int, str]]]]] = []
-        self.nlp: spacy.language.Language = spacy.load("fr_core_news_sm")
+    def __init__(self, model_size: str):
+        model_map = {
+            "small": "fr_core_news_sm",
+            "medium": "fr_core_news_md",
+            "large": "fr_core_news_lg",
+        }
+        if model_size not in model_map:
+            raise ValueError("Model size must be either 'small', 'medium' or 'large'")
+
+        self.model_size = model_size
+        self.train_data = []
+        self.nlp: spacy.language.Language = spacy.load(model_map[model_size])
         self.ner = self.nlp.get_pipe("ner")
 
     def load_data(self, train_file: str) -> None:
@@ -62,7 +73,19 @@ class SpacyNERTrainer:
 
         return self.train_data
 
-    def train_spacy(self, iterations: int = 100) -> spacy.language.Language:
+    def evaluate(self, eval_data):
+        """Evaluate the model on a validation dataset."""
+        scorer = Scorer()
+        examples = [
+            Example.from_dict(self.nlp.make_doc(text), annot)
+            for text, annot in eval_data
+        ]
+        for example in examples:
+            self.nlp(example.predicted)
+            scorer.score(example)
+        return scorer.scores
+
+    def train_spacy(self, Train_data, iterations: int = 100) -> spacy.language.Language:
         """
         Trains the NER model on the prepared training data.
 
@@ -79,7 +102,7 @@ class SpacyNERTrainer:
         best_loss = float("inf")
         best_model = None
 
-        for _, annotations in self.train_data:
+        for _, annotations in Train_data:
             for ent in annotations.get("entities"):
                 self.ner.add_label(ent[2])
 
@@ -89,15 +112,19 @@ class SpacyNERTrainer:
             optimizer = self.nlp.resume_training()
             for i in range(iterations):
                 losses = {}
-                batches = minibatch(self.train_data, size=compounding(4.0, 32.0, 1.001))
+                batches = minibatch(Train_data, size=compounding(5.0, 32.0, 1.0214))
                 for batch in batches:
                     texts, annotations = zip(*batch)
                     for text, annot in zip(texts, annotations):
                         doc = self.nlp.make_doc(text)
-                        example = Example.from_dict(doc, annot)
-                        self.nlp.update(
-                            [example], drop=0.1, sgd=optimizer, losses=losses
-                        )
+                        try:
+                            example = Example.from_dict(doc, annot)
+                            self.nlp.update(
+                                [example], drop=0.1, sgd=optimizer, losses=losses
+                            )
+                        except Exception as e:
+                            print(f"Error: {e}")
+                            pass
                 print(f"Iteration {i + 1}, Losses: {losses}")
 
                 # Check if the current loss is the best
@@ -122,10 +149,15 @@ class SpacyNERTrainer:
 
 
 if __name__ == "__main__":
-    trainer = SpacyNERTrainer()
-    trainer.load_data(train_file=Train)
-    trained_model = trainer.train_spacy(iterations=100)
-    trainer.save_model(
-        model_to_save=trained_model,
-        output_dir=Output_model + "model_spacy/small/test1.model",
-    )
+    if len(sys.argv) != 2:
+        print("Usage: python trainning.py <model_size>")
+        print("model_size: 'small' , 'medium' or 'large'")
+        sys.exit(1)
+
+    model_size = sys.argv[1]
+    trainer = SpacyNERTrainer(model_size=model_size)
+    train = trainer.load_data(train_file=Train)
+
+    output_dir = Output_model + f"model_spacy/small/{model_size}_trained.model"
+    trained_model = trainer.train_spacy(train, iterations=100)
+    trainer.save_model(model_to_save=trained_model, output_dir=output_dir)

@@ -1,31 +1,34 @@
-data_actif = [
+data_actif_without = [
     "Je pars de X et j'arrive à Y sans correspondance.",
-    "De X, je prends un train et je fais une correspondance à C avant d'arriver à Y.",
-    "Le bus part de X, passe par C, et termine son trajet à Y.",
-    "Depuis X, je change à C et je finis à Y.",
-    "Mon trajet commence à X, passe par C, puis je termine à Y.",
     "Le train démarre de X sans correspondance, et arrive directement à Y.",
     "Le vol de X à Y est direct, et je voyage avec une collègue nommée Annecy.",
-    "De X à Y en passant par C, le voyage est rapide.",
-    "Le trajet entre X et Y inclut une correspondance à C.",
-    "Je vais de X à Y en train, avec une correspondance à C.",
     "Le trajet en RER de X à Y est rapide, mais il y a toujours du monde à cette heure-là.",
-    "Le métro part de X et passe par C avant d'arriver à Y.",
     "Le bus démarre à X, fait une correspondance à C, et arrive à Y.",
     "On se retrouve à X avant de partir pour Y avec une fille nommée Bordeaux.",
     "Le train de X à Y est rapide, et je suis avec une copine appelée Valence.",
     "Je dois prendre un bus de X à Y sans faire de correspondance.",
-    "Le trajet commence à X, fait une correspondance à C, puis termine à Y.",
-    "Je change à C après avoir quitté X, et je finis à Y.",
     "Le bus de X à Y est plein, mais on s’installe confortablement avec une copine nommée Anne.",
-    "Le train part de X, correspond à C, et arrive à Y.",
-    "Je prends le bus à X, il fait un arrêt à C, et arrive à Y.",
     "Mon trajet débute à X et finit à Y sans correspondance.",
     "On prend le RER B pour aller de X à Y, c'est super pratique pour Sophie.",
-    "Je prends un bus à X, il s'arrête à C et se dirige vers Y.",
     "Le trajet est commencé à X et terminé à Y sans correspondance.",
-    "Le train est pris à X, une correspondance est effectuée à C avant d'arriver à Y.",
     "On prend le RER B pour aller de X à Y, c'est super pratique.",
+]
+
+data_actif_with = [
+    "De X, je prends un train et je fais une correspondance à C avant d'arriver à Y.",
+    "Le train est pris à X, une correspondance est effectuée à C avant d'arriver à Y.",
+    "Je prends un bus à X, il s'arrête à C et se dirige vers Y.",
+    "Je change à C après avoir quitté X, et je finis à Y.",
+    "Le métro part de X et passe par C avant d'arriver à Y.",
+    "Depuis X, je change à C et je finis à Y.",
+    "Le bus part de X, passe par C, et termine son trajet à Y.",
+    "Mon trajet commence à X, passe par C, puis je termine à Y.",
+    "De X à Y en passant par C, le voyage est rapide.",
+    "Le trajet entre X et Y inclut une correspondance à C.",
+    "Je vais de X à Y en train, avec une correspondance à C.",
+    "Le trajet commence à X, fait une correspondance à C, puis termine à Y.",
+    "Le train part de X, correspond à C, et arrive à Y.",
+    "Je prends le bus à X, il fait un arrêt à C, et arrive à Y.",
 ]
 
 data_passif = [
@@ -46,12 +49,12 @@ data_question = [
     "Est-ce que je prends le train à X pour aller à Y en passant par C ?",
     "Est-ce que je dois changer à C entre X et Y ?",
     "Dois-je changer à C pour aller de X à Y ?",
-    "Y a-t-il un arrêt à C entre X et Y ?",
+    "Est ce qu'il y'a un arrêt à C entre X et Y ?",
     "Est-ce que le métro de X passe par C pour arriver à Y ?",
     "Dois-je prendre un train à X, faire un arrêt à C, puis arriver à Y ?",
     "Faut-il changer à C quand on part de X pour aller à Y ?",
     "Est-ce que je dois changer à C pour aller de X à Y ?",
-    "Y a-t-il une correspondance à C entre X et Y ?",
+    "Est ce qu'il y'a une correspondance à C entre X et Y ?",
     "Est-ce que le bus de X s'arrête à C avant d'arriver à Y ?",
 ]
 
@@ -61,7 +64,7 @@ data_direct = [
     "X ; Y.",
     "X / Y",
     "X - Y",
-    "X _ Y",
+    "X C Y",
 ]
 
 data_error = [
@@ -79,7 +82,7 @@ data_error = [
 
 data_unique = [
     "Je prends le premier train qui part de X et termine son trajet à Y en fin d'après-midi.",
-    "Après être parti de X, je fais une courte escale à Z avant de finalement rejoindre Y.",
+    "Après être parti de X, je fais une courte escale à C avant de finalement rejoindre Y.",
     "Mon itinéraire commence à X et, sans correspondance, m'amène directement à Y où je passerai la nuit.",
     "Je voyage de X à Y en avion, avec un court transit à C pour changer de vol.",
     "Depuis X, je prends un taxi jusqu'à C, où un train m'attend pour m'amener à Y.",

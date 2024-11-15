@@ -7,7 +7,8 @@ from utils import (
     load_data,
 )
 from data.data_need import (
-    data_actif,
+    data_actif_without,
+    data_actif_with,
     data_passif,
     data_question,
     data_error,
@@ -24,10 +25,11 @@ def build() -> None:
     """
     Writes the example sentences dataset to a CSV file.
     """
-    processed_actif = replace_and_generate_response(data_actif)
+    processed_actif = replace_and_generate_response(data_actif_with * 10)
+    processed_actif = replace_and_generate_response(data_actif_without)
     processed_passif = replace_and_generate_response(data_passif)
     processed_question = replace_and_generate_response(data_question)
-    processed_direct = replace_and_generate_response(data_direct)
+    processed_direct = replace_and_generate_response(data_direct * 50)
     processed_error = replace_and_generate_error(data_error)
 
     merged_data = merge_datasets(
@@ -65,9 +67,12 @@ class BuildDataset:
         Processes the unique dataset sentences and splits them equally between validation and test sets.
         """
         processed_unique = replace_and_generate_response(data_unique)
+        processed_direct_train = replace_and_generate_response(data_direct * 50)
 
         unique_val, unique_test = train_test_split(
-            processed_unique, test_size=0.5, random_state=self.random_state
+            processed_unique + processed_direct_train,
+            test_size=0.5,
+            random_state=self.random_state,
         )
 
         self.X_val.extend([item[0] for item in unique_val])
