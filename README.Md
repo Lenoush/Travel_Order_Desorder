@@ -60,7 +60,6 @@ Gabrielle : Gabrielle-F
 Thomas Chevalier : TooikLeChevalier  
 Mathias : matthiaspn
 
-
 ## Ameliorations retenues 
 - Mettre le nom de ville en minuscule dans l'input => le model ne reverrai pas uniquement les mots avec une majuscule. 
 - Rajouter dans le dataset des phrases d'entrainements avec des villes qui n'ont pas de gare sncf.
@@ -94,3 +93,4 @@ Mathias : matthiaspn
     - Trajet direct 
     - Moins de correspondance possible 
     - Plus court possible 
+
