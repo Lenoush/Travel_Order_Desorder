@@ -77,8 +77,8 @@ Mathias : matthiaspn
 |------------------------------------|-----------------------|
 | **Medium without rule**           | 8.11%                 |
 | **Medium with rule**              | 10.16%                |
-| **Medium trained without rule**   | 48.97%                |
-| **Medium trained with rule**      | 63.75%                |
+| **Medium trained without rule**   | 52.53%                |
+| **Medium trained with rule**      | 71.86%               |
 |------------------------------------|-----------------------|
 | **Large without rule**            | 10.66%                |
 | **Large with rule**               | 13.73%                |

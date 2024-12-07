@@ -11,27 +11,6 @@ from config import Output_model, Train
 class SpacyNERTrainer:
     """
     A class to train a Named Entity Recognition (NER) model using spaCy.
-
-    Attributes:
-    -----------
-    train_data : List[Tuple[str, Dict[str, List[Tuple[int, int, str]]]]]
-        The training data consisting of phrases and their associated entities.
-    nlp : spacy.language.Language
-        The spaCy language model.
-
-    Methods:
-    --------
-    load_data(train_file: str) -> None:
-        Loads the training data from CSV files.
-
-    prepare_data() -> None:
-        Prepares the training data for the NER model.
-
-    train_spacy(iterations: int = 100) -> spacy.language.Language:
-        Trains the NER model on the prepared training data.
-
-    save_model(output_dir: str) -> None:
-        Saves the trained model to the specified directory.
     """
 
     def __init__(self, model_size: str):

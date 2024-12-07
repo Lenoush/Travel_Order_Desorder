@@ -130,8 +130,12 @@ class BuildDataset:
 
 if __name__ == "__main__":
     dataset = BuildDataset(dataset_path=Dataset)
+    print("Building dataset")
     build()
+    print("Loading and splitting data")
     phrases, responses = load_data(dataset.dataset_path)
     dataset.split_data(phrases, responses)
+    print("Building unique dataset")
     dataset.build_unique()
+    print("Saving data")
     dataset.save_data()

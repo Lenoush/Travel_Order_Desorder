@@ -25,7 +25,8 @@ def clean_word(word: str) -> str:
     cleaned_word = re.sub(r"\d+", "", cleaned_word).strip()
 
     # Add a hyphen between 'La' or 'Le' and the final word if they are separated by a space
-    # cleaned_word = re.sub(r"\b(La|Le)\s+(\w+)", r"\1-\2", cleaned_word)
+    cleaned_word = re.sub(r"\b(-la|-le|-les)\s+(\w+)", r"\1-\2", cleaned_word)
+    cleaned_word = re.sub(r"\b(-La|-Le|-Les)\s+(\w+)", r"\1-\2", cleaned_word)
 
     # Remove any trailing 'TT' characters
     cleaned_word = re.sub(r"TT$", "", cleaned_word).strip()
@@ -46,9 +47,6 @@ def get_random_word_from_file() -> str:
             words.append(cleaned_word)
     words.extend(ville_sans_gare)
     return random.choice(words)
-
-
-get_random_word_from_file()
 
 
 def load_sncf_data() -> pd.DataFrame:

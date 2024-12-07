@@ -1,14 +1,13 @@
 import re
 import sys
 import spacy
-import pandas as pd
 from config import Valid, Output_model
 from src.data_process.utils import load_data
 
 
 class Evaluators:
 
-    def __init__(self, data: pd.DataFrame, model_size: spacy):
+    def __init__(self, model_size: spacy):
         """
         Initializes the EntityEvaluator.
         """
@@ -16,17 +15,14 @@ class Evaluators:
             "none_small": spacy.load("fr_core_news_sm"),
             "none_medium": spacy.load("fr_core_news_md"),
             "none_large": spacy.load("fr_core_news_lg"),
-            "small": spacy.load(Output_model + "model_spacy/small/small_trained.model"),
-            "medium": spacy.load(
-                Output_model + "model_spacy/small/medium_trained.model"
-            ),
-            "large": spacy.load(Output_model + "model_spacy/small/large_trained.model"),
+            "small": spacy.load(Output_model + "model_spacy/small_trained.model"),
+            "medium": spacy.load(Output_model + "model_spacy/medium_trained.model"),
+            "large": spacy.load(Output_model + "model_spacy/large_trained.model"),
         }
         if model_size not in model_map:
             raise ValueError("Model size must be something specific.")
 
         self.model = model_map[model_size]
-        self.phrases, self.responses = load_data(data)
         self.model_small = spacy.load("fr_core_news_sm")
         self.symbols = ["-", "'", "`", "‘", "’", "´", "ˋ"]
 
@@ -72,10 +68,11 @@ class Evaluators:
         doc = self.model(phrase)
         return [ent.text for ent in doc.ents if ent.label_ == "LOC"], doc
 
-    def evaluate_without_rules(self) -> None:
+    def evaluate_without_rules(self, data) -> None:
         """
         Evaluates entity recognition without using any custom rules.
         """
+        self.phrases, self.responses = load_data(data)
         correct = 0
         total = len(self.phrases)
 
@@ -104,13 +101,13 @@ class Evaluators:
         """
         return list(dict.fromkeys(cities))
 
-    def evaluate_with_rules(self) -> None:
+    def evaluate_with_rules(self, data) -> None:
         """
         Evaluates entity recognition with custom rules.
         """
+        self.phrases, self.responses = load_data(data)
         correct = 0
         total = len(self.phrases)
-        mauvaise_correspondance = 0
 
         for phrase, reponse in zip(self.phrases, self.responses):
             predicted_cities, doc = self.extract_cities(phrase)
@@ -142,10 +139,6 @@ class Evaluators:
                     if ville in hyphenated:
                         predicted_cities[i] = hyphenated
 
-                # Respacy le mot
-                # doc2 = self.model_small(ville)
-                # print([ent.label_ for ent in doc2.ents], ville)
-
             # Appliquer les règles
             if len(predicted_cities) < 2:
                 predicted_cities = []
@@ -158,13 +151,7 @@ class Evaluators:
             if predicted_cities == expected_cities:
                 correct += 1
             else:
-                if sorted(predicted_cities) == sorted(expected_cities):
-                    mauvaise_correspondance += 1
-                else:
-                    # print(predicted_cities, expected_cities)
-                    # print([ent.label_ for ent in doc.ents])
-                    # print(phrase)
-                    pass
+                pass
 
         accuracy = (correct / total) * 100
         print("With rules")
@@ -182,10 +169,12 @@ def main():
     model_size = sys.argv[1]
 
     print(f"Spacy model {model_size}")
-    evaluator = Evaluators(Valid, model_size)
-    evaluator.evaluate_without_rules()
+    print(len(Valid))
+
+    evaluator = Evaluators(model_size)
+    evaluator.evaluate_without_rules(Valid)
     print("\n")
-    evaluator.evaluate_with_rules()
+    evaluator.evaluate_with_rules(Valid)
     print("\n")
 
 
