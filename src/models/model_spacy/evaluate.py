@@ -1,8 +1,8 @@
 import re
 import sys
 import spacy
-from config import Valid, Output_model
-from src.data_process.utils import load_data
+from config import Valid_train, Output_model
+from src.data_process.utils.utils import load_data
 
 
 class Evaluators:
@@ -45,25 +45,6 @@ class Evaluators:
 
         return "".join(lemmatized).strip()
 
-    def is_question(self, phrase: str) -> bool:
-        """
-        Determines if the given phrase is a question.
-        """
-        mots_interrogatifs = [
-            "qui",
-            "quoi",
-            "où",
-            "quand",
-            "comment",
-            "pourquoi",
-            "lequel",
-            "faut-il",
-        ]
-        return (
-            any(token.lemma_ in mots_interrogatifs for token in self.model(phrase))
-            or "?" in phrase
-        )
-
     def extract_cities(self, phrase):
         doc = self.model(phrase)
         return [ent.text for ent in doc.ents if ent.label_ == "LOC"], doc
@@ -87,8 +68,6 @@ class Evaluators:
             if predicted_cities == expected_cities:
                 correct += 1
             else:
-                # print(predicted_cities, expected_cities)
-                # print(phrase)
                 pass
 
         print("Without rules")
@@ -153,8 +132,8 @@ class Evaluators:
             else:
                 pass
 
+        print("Without rules")
         accuracy = (correct / total) * 100
-        print("With rules")
         print(f"Accuracy: {accuracy:.2f}%")
 
 
@@ -168,13 +147,10 @@ def main():
 
     model_size = sys.argv[1]
 
-    print(f"Spacy model {model_size}")
-    print(len(Valid))
-
     evaluator = Evaluators(model_size)
-    evaluator.evaluate_without_rules(Valid)
+    evaluator.evaluate_without_rules(Valid_train)
     print("\n")
-    evaluator.evaluate_with_rules(Valid)
+    evaluator.evaluate_with_rules(Valid_train)
     print("\n")
 
 
