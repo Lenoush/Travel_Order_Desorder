@@ -42,7 +42,7 @@ Si des problèmes sont détectés, vous devrez les corriger avant que le commit 
 Léna Oudjman : Lenoush  
 Gabrielle : Gabrielle-F  
 Thomas Chevalier : TooikLeChevalier  
-Mathias :   
+Mathias : matthiaspn
 
 
 ## Ameliorations retenues 
