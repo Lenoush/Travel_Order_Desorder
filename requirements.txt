@@ -1,3 +1,12 @@
-requests
-pandas
+requests~=2.32.3
+pandas~=2.2.3
 
+# Style
+pre-commit==2.13.0
+black==24.8.0 
+ruff==0.6.8
+
+spacy~=3.8.2
+
+scikit-learn~=1.5.2
+setuptools~=75.2.0

@@ -1,7 +1,10 @@
-**/*.csv
-/config.py
 
 **/**/__pycache__/
 .DS_Store
-
+**.egg-info/
 **.ruff_cache/
+
+**.model
+**/*.csv
+/config.py
+**/*.png
