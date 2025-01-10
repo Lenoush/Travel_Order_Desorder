@@ -10,10 +10,19 @@ pip install -r requirements.txt
 Se créer un fichier config avec : 
 ```
 SNCF_gare = "path_you_want.csv"
-Dataset = "path_you_want.csv"
-Train = "path_you_want.csv"
-Valid = "path_you_want.csv"
-Test = "path_you_want.csv"
+
+Dataset_train  = "path_you_want.csv"
+Train_train  = "path_you_want.csv"
+Valid_train  = "path_you_want.csv"
+Test_train  = "path_you_want.csv"
+
+Dataset_vierge  = "path_you_want.csv"
+Train_vierge  = "path_you_want.csv"
+Valid_vierge  = "path_you_want.csv"
+Test_vierge  = "path_you_want.csv"
+
+Output_model  = "path_you_want.csv"
+
 ```
 
 ## How to use 
@@ -89,6 +98,7 @@ Mathias : matthiaspn
     - Pas en Francais 
     - Minimum 2 villes (départ/arrivée)
     - Ville non reconnue
+    - si depart et arrivee meme ville : erreur (pas dans le train dataset)
 - Inserer des critères dans la path finding :
     - Trajet direct 
     - Moins de correspondance possible 

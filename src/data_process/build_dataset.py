@@ -1,46 +1,35 @@
-from utils import (
+"""  This script is used to build the dataset for training the model."""
+
+import sys
+from typing import List, Tuple
+import pandas as pd
+from sklearn.model_selection import train_test_split
+
+from src.data_process.utils import (
     write_data_to_csv,
-    load_sncf_data,
-    replace_and_generate_response,
     merge_datasets,
-    replace_and_generate_error,
     load_data,
+    load_sncf_data,
+    RGR_train,
+    RGR_vierge,
 )
 from data.data_need import (
     data_actif_without,
     data_actif_with,
-    data_passif,
     data_question,
-    data_error,
     data_direct,
     data_unique,
 )
-from config import Dataset, Train, Test, Valid
-
-import pandas as pd
-from sklearn.model_selection import train_test_split
-
-
-def build() -> None:
-    """
-    Writes the example sentences dataset to a CSV file.
-    """
-    processed_actif = replace_and_generate_response(data_actif_with * 10)
-    processed_actif = replace_and_generate_response(data_actif_without)
-    processed_passif = replace_and_generate_response(data_passif)
-    processed_question = replace_and_generate_response(data_question)
-    processed_direct = replace_and_generate_response(data_direct * 50)
-    processed_error = replace_and_generate_error(data_error)
-
-    merged_data = merge_datasets(
-        processed_actif,
-        processed_passif,
-        processed_question,
-        processed_error,
-        processed_direct,
-    )
-
-    write_data_to_csv(merged_data, Dataset)
+from config import (
+    Dataset_train,
+    Train_train,
+    Test_train,
+    Valid_train,
+    Dataset_vierge,
+    Train_vierge,
+    Test_vierge,
+    Valid_vierge,
+)
 
 
 class BuildDataset:
@@ -48,13 +37,27 @@ class BuildDataset:
     A class to load and build a dataset from SNCF data and write it to a CSV file.
     """
 
-    def __init__(self, dataset_path: str, random_state: int = 42) -> None:
+    def __init__(
+        self,
+        dataset_path: str,
+        random_state: int = 42,
+        vierge: bool = False,
+        train_file: str = Train_train,
+        val_file: str = Valid_train,
+        test_file: str = Test_train,
+    ) -> None:
         """
-        Initializes the BuildDataset class by loading the SNCF data.
+        Initializes the BuildDataset class by loading the SNCF data, setting the dataset path and creating lists to store the split data.
         """
         self.data: pd.DataFrame = load_sncf_data()
         self.dataset_path: str = dataset_path
+        self.train_file: str = train_file
+        self.val_file: str = val_file
+        self.test_file: str = test_file
+
         self.random_state: int = random_state
+        self.vierge: bool = vierge
+
         self.X_train: list[str] = []
         self.X_val: list[str] = []
         self.X_test: list[str] = []
@@ -62,12 +65,48 @@ class BuildDataset:
         self.y_val: list[str] = []
         self.y_test: list[str] = []
 
+    def build(self) -> None:
+        """
+        Builds the dataset by processing the example sentences and writing them to a CSV file.
+        """
+        if self.vierge:
+            processed_actif: List[Tuple[str, dict]] = RGR_vierge(data_actif_with)
+            processed_actif_without: List[Tuple[str, dict]] = RGR_vierge(
+                data_actif_without
+            )
+            processed_question: List[Tuple[str, dict]] = RGR_vierge(data_question)
+            processed_direct: List[Tuple[str, dict]] = RGR_vierge(data_direct)
+            # processed_error:List[Tuple[str, dict]] = RGE_vierge(data_error)
+        else:
+            processed_actif: List[Tuple[str, dict]] = RGR_train(data_actif_with)
+            processed_actif_without: List[Tuple[str, dict]] = RGR_train(
+                data_actif_without
+            )
+            processed_question: List[Tuple[str, dict]] = RGR_train(data_question)
+            processed_direct: List[Tuple[str, dict]] = RGR_train(data_direct)
+            # processed_error:List[Tuple[str, dict]] = RGE_train(data_error)
+
+        merged_data: List[str] = merge_datasets(
+            processed_actif,
+            processed_question,
+            processed_actif_without,
+            # processed_error,
+            processed_direct,
+        )
+
+        write_data_to_csv(merged_data, self.dataset_path)
+
     def build_unique(self) -> None:
         """
-        Processes the unique dataset sentences and splits them equally between validation and test sets.
+        Builds the unique dataset by processing the example sentences and splitting them into validation and test sets.
+        We will not have this kind of sentence in the training set.
         """
-        processed_unique = replace_and_generate_response(data_unique)
-        processed_direct_train = replace_and_generate_response(data_direct * 50)
+        if self.vierge:
+            processed_unique: List[Tuple[str, dict]] = RGR_vierge(data_unique)
+            processed_direct_train: List[Tuple[str, dict]] = RGR_vierge(data_direct)
+        else:
+            processed_unique: List[Tuple[str, dict]] = RGR_train(data_unique)
+            processed_direct_train: List[Tuple[str, dict]] = RGR_train(data_direct)
 
         unique_val, unique_test = train_test_split(
             processed_unique + processed_direct_train,
@@ -98,40 +137,46 @@ class BuildDataset:
         self.X_test.extend(x_test)
         self.y_test.extend(y_test)
 
-    def save_data(
-        self,
-        train_file: str = Train,
-        val_file: str = Valid,
-        test_file: str = Test,
-    ) -> None:
+    def save_data(self) -> None:
         """
         Saves the split data into separate CSV files for training, validation, and test sets.
-
-        Parameters:
-        -----------
-        train_file : str, optional
-            Path to save the training data (default is 'data/train_dataset.csv').
-        val_file : str, optional
-            Path to save the validation data (default is 'data/valid_dataset.csv').
-        test_file : str, optional
-            Path to save the test data (default is 'data/test_dataset.csv').
         """
 
-        # Helper function to save data to a CSV
-        def save_to_csv(data: list[str], labels: list[str], filename: str) -> None:
-            pd.DataFrame({"Phrase": data, "Reponse": labels}).to_csv(
+        def save_to_csv(dataX: list[str], dataY: list[str], filename: str) -> None:
+            pd.DataFrame({"Phrase": dataX, "Reponse": dataY}).to_csv(
                 filename, index=False
             )
 
-        save_to_csv(self.X_train, self.y_train, train_file)
-        save_to_csv(self.X_val, self.y_val, val_file)
-        save_to_csv(self.X_test, self.y_test, test_file)
+        save_to_csv(self.X_train, self.y_train, self.train_file)
+        save_to_csv(self.X_val, self.y_val, self.val_file)
+        save_to_csv(self.X_test, self.y_test, self.test_file)
 
 
 if __name__ == "__main__":
-    dataset = BuildDataset(dataset_path=Dataset)
+    try:
+        if len(sys.argv) != 2:
+            print("Usage: python build_dataset.py <vierge or train>")
+            sys.exit(1)
+        else:
+            if sys.argv[1] == "vierge":
+                dataset = BuildDataset(
+                    dataset_path=Dataset_vierge,
+                    vierge=True,
+                    train_file=Train_vierge,
+                    val_file=Valid_vierge,
+                    test_file=Test_vierge,
+                )
+            elif sys.argv[1] == "train":
+                dataset = BuildDataset(dataset_path=Dataset_train)
+            else:
+                print("Usage: python build_dataset.py <vierge or train>")
+                sys.exit(1)
+    except (ValueError, TypeError):
+        print("Usage: python build_dataset.py <vierge or train>")
+        sys.exit(1)
+
     print("Building dataset")
-    build()
+    dataset.build()
     print("Loading and splitting data")
     phrases, responses = load_data(dataset.dataset_path)
     dataset.split_data(phrases, responses)
