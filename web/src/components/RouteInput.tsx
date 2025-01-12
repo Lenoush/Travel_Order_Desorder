@@ -3,12 +3,18 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import axios from 'axios';
 
-interface RouteInputProps {
-  onRouteSubmit: (route: string) => void;
+interface RouteResponse {
+  responsesmodel: Array<JSON>;
+  text: string;
 }
 
-const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
+interface RouteInputProps {
+  setResponses: React.Dispatch<React.SetStateAction<RouteResponse[]>>;
+}
+
+const RouteInput: React.FC<RouteInputProps> = ({ setResponses }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [routeText, setRouteText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,6 +23,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
   const chunksRef = useRef<Blob[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>();
+
 
   useEffect(() => {
     return () => {
@@ -46,7 +53,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        simulateTranscription();
       };
 
       mediaRecorder.start();
@@ -87,19 +93,36 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
     }
   };
 
-  const simulateTranscription = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setRouteText(prev => prev + "New York to Los Angeles via Chicago");
-      setIsProcessing(false);
-    }, 1500);
-  };
+  const handleSubmit = async () => {
+    if (!routeText.trim()) return;
+    let headers = new Headers();
 
-  const handleSubmit = () => {
-    if (routeText.trim()) {
-      onRouteSubmit(routeText);
+    const body = JSON.stringify({ text: routeText });
+  
+    try {
+      headers.append('Content-Type', 'application/json');
+      headers.append('Accept', 'application/json');
+      headers.append('Origin','http://localhost:5000');
+
+      const response = await fetch('http://127.0.0.1:5000/api/route', {
+        method: 'POST',
+        headers,
+        body, 
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch');
+      }
+  
+      const responses = await response.json();
+      console.log(responses); 
+      setResponses(responses);
+
+    } catch (error) {
+      console.error('Error:', error, body);
     }
   };
+
 
   return (
     <div className="space-y-4 w-full max-w-2xl mx-auto">

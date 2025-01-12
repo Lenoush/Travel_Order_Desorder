@@ -5,10 +5,6 @@ from typing import List, Tuple
 
 from config import Valid_vierge, Test_vierge
 
-output_dir = "src/models/model_spacy_vierge/2025-01-09_trained.model"
-nlp = spacy.load(output_dir)
-
-
 def load_data(valid_file: str):
     valid_ = []
 
@@ -93,8 +89,11 @@ def evaluate_model(nlp, validation_data: List[Tuple[str, dict]]) -> None:
     return accuracy
 
 
-data_test = load_data(Test_vierge)
-data_valid = load_data(Valid_vierge)
-acc_test = evaluate_model(nlp, data_test)
-acc_valid = evaluate_model(nlp, data_valid)
-print(acc_test, acc_valid)
+# output_dir = "src/models/model_spacy_vierge/2025-01-09_trained.model"
+# nlp = spacy.load(output_dir)
+
+# data_test = load_data(Test_vierge)
+# data_valid = load_data(Valid_vierge)
+# acc_test = evaluate_model(nlp, data_test)
+# acc_valid = evaluate_model(nlp, data_valid)
+# print(acc_test, acc_valid)
