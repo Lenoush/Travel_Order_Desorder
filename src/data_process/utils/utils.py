@@ -6,8 +6,9 @@ from typing import List
 
 import pandas as pd
 import requests
+from unidecode import unidecode
 
-from data.data_need import ville_sans_gare
+from data.data_need import ville_sans_gare, villes_france
 from config import SNCF_gare
 
 
@@ -60,19 +61,18 @@ def merge_datasets(*datasets: List[str]) -> List[str]:
     return merged_data
 
 
-def get_random_word_from_file() -> str:
-    """
-    Reads a CSV file and returns a random word from the 'LIBELLE' column.
-    """
-
+def get_list_sncf_city_from_file() -> str:
     with open(SNCF_gare, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file, delimiter=";")
         words = []
         for row in reader:
             cleaned_word = clean_word(row["LIBELLE"])
-            words.append(cleaned_word)
+            words.append(cleaned_word.lower())
     words.extend(ville_sans_gare)
-    return random.choice(words)
+    return words
+
+def get_random_ville_france() -> str:
+    return random.choice(villes_france)
 
 
 def load_sncf_data() -> pd.DataFrame:
@@ -110,3 +110,18 @@ def load_data(dataset_path) -> tuple[List, List]:
     phrases = df["Phrase"].tolist()
     responses = df["Reponse"].tolist()
     return phrases, responses
+
+def simple_cleaning(phrase: str) -> str:
+    """
+    Cleans a phrase by removing any parentheses and leading/trailing whitespace.
+    """
+    # Remove any ponctuation
+    # cleaned_phrase = re.sub(r"[^\w\s]", "", phrase)
+    cleaned_phrase = phrase
+    # Remove any accents
+    cleaned_phrase = unidecode(cleaned_phrase)
+
+    # Add point a la fin de chaque phrase
+    cleaned_phrase = cleaned_phrase + "."
+
+    return cleaned_phrase

@@ -1,7 +1,9 @@
+import random
 import re
 from typing import List, Tuple
 
-from src.data_process.utils.utils import get_random_word_from_file
+from src.data_process.utils.utils import get_list_sncf_city_from_file, simple_cleaning
+from data.data_need import villes_france
 
 
 def replace_and_generate_response(dataset: List[str]) -> List[Tuple[str, dict]]:
@@ -13,22 +15,25 @@ def replace_and_generate_response(dataset: List[str]) -> List[Tuple[str, dict]]:
     :return: Liste de tuples au format (phrase, {"entities": [...]}) pour SpaCy.
     """
     processed_data = []
+    words_to_use = get_list_sncf_city_from_file()
 
     for phrase in dataset:
-        for _ in range(50):
+        phrase = simple_cleaning(phrase)
+        for _ in range(10):
             modified_phrase = phrase
             reponse = {"entities": []}
-            words_used = []
 
             offset = 0
 
             for match in re.finditer(r"\b[XYC]\b", modified_phrase):
                 stripped_word = match.group()
 
-                random_city = get_random_word_from_file().lower()
-                while random_city in words_used:
-                    random_city = get_random_word_from_file().lower()
-                words_used.append(random_city)
+                if words_to_use == []:
+                    random_city = random.choice(villes_france).lower()
+                    villes_france.remove(random_city)
+                else :
+                    random_city = random.choice(words_to_use)
+                    words_to_use.remove(random_city)
 
                 start_idx = match.start() + offset
                 end_idx = match.end() + offset
@@ -56,23 +61,3 @@ def replace_and_generate_response(dataset: List[str]) -> List[Tuple[str, dict]]:
             processed_data.append((modified_phrase, reponse))
     return processed_data
 
-
-def replace_and_generate_error(dataset: List[str]) -> List[List[str]]:
-    """
-    Replace 'X' in phrases with a random city name and generate an error response.
-    Each phrase is recorded 5 times with different city names.
-    """
-    processed_data = []
-    for phrase in dataset:
-        for _ in range(20):
-            modified_phrase = phrase
-            for word in modified_phrase.split():
-                stripped_word = word.strip(".,;!?")
-                if stripped_word in ["X", "Y", "C"]:
-                    random_word = get_random_word_from_file().lower()
-                    modified_phrase = modified_phrase.replace(word, random_word, 1)
-            processed_data.append(
-                (modified_phrase, {"entities": [(0, len(modified_phrase), "ERROR")]})
-            )
-
-    return processed_data

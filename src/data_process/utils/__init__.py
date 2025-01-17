@@ -3,16 +3,15 @@ from src.data_process.utils.utils import (
     merge_datasets,
     load_data,
     load_sncf_data,
+    simple_cleaning
 )
 
 from src.data_process.utils.utils_train import (
     replace_and_generate_response as RGR_train,
-    replace_and_generate_error as RGE_train,
 )
 
 from src.data_process.utils.utils_vierge import (
     replace_and_generate_response as RGR_vierge,
-    replace_and_generate_error as RGE_vierge,
 )
 
 __all__ = [
@@ -24,4 +23,5 @@ __all__ = [
     "RGE_train",
     "RGR_vierge",
     "RGE_vierge",
+    "simple_cleaning",
 ]

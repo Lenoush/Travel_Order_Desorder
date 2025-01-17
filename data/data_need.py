@@ -114,6 +114,44 @@ data_actif_without = [
     "Je prends un vol de X à Y sans correspondance ni détour.",
 ]
 
+date_phrase_simple = [
+    "Je vais de X à Y.",
+    "Le train part de X pour aller à Y.",
+    "Nous voyageons de X jusqu’à Y.",
+    "Tu passes de X à Y en train.",
+    "Ils roulent de X vers Y.",
+    "On change de X pour arriver à Y.",
+    "Je viens de X et je me rends à Y.",
+    "Elle part de X pour aller à Y.",
+    "Nous voyageons de X jusqu’à Y.",
+    "Tu passes de X à Y en train",
+    "Ils roulent de X vers Y" ,
+    "On change de X pour arriver à Y" ,
+    "Je viens de X et je me rends à Y" ,
+    "Il vole de X à Y en avion" ,
+    "On part de X pour atteindre Y" ,
+    "Je vais de X à Y en passant par C.",
+    "Elle part de X, fait une correspondance à C, puis arrive à Y",
+    "Nous voyageons de X à Y avec un arrêt à C",
+    "Tu passes de X à Y via C",
+    "Ils roulent de X à C avant de continuer vers Y",
+    "On change de train à C pour aller de X à Y",
+    "Je viens de X, je m’arrête à C, puis je vais à Y",
+    "Vous partez de X, faites un détour par C, et arrivez à Y",
+    "Il vole de X à Y avec une escale à C",
+    "On quitte X, passe par C, et termine à Y",
+    "Je vais de X à Y via C. ",
+    "Elle part de X et prend un itinéraire via C pour arriver à Y",
+    "Nous voyageons de X à Y via C pour éviter les embouteillages",
+    "Tu passes de X à Y via C, c’est plus rapide",
+    "Ils roulent de X via C pour rejoindre Y",
+    "On change de train à C via X pour arriver à Y",
+    "Je vais de X à Y via C pour une meilleure vue",
+    "Vous partez de X et passez via C avant d’arriver à Y",
+    "Il prend l’avion de X à Y via C",
+    " On part de X et traverse C via Y pour aller à notre destination.",
+]
+
 data_actif_with = [
     "Le bus démarre à X, fait une correspondance à C, et arrive à Y.",
     "De X, je prends un train et je fais une correspondance à C avant d'arriver à Y.",
@@ -415,3 +453,14 @@ ville_sans_gare = [
     "Lourmarin",
     "Collioure",
 ]
+
+villes_france = [
+    "Paris", "Marseille", "Lyon", "Toulouse", "Nice", "Nantes", "Montpellier", "Strasbourg", 
+    "Bordeaux", "Lille", "Rennes", "Aix-en-Provence", "Grenoble", "Le Havre", "Dijon", 
+    "Saint-Étienne", "Toulon", "Clermont-Ferrand", "Angers", "Avignon", "Reims", "Rouen", 
+    "Limoges", "La Rochelle", "Annecy", "Perpignan", "Metz", "Tours", "Orléans", "Mulhouse", 
+    "Nîmes", "Caen", "Brest", "Amiens", "La Baule", "Carcassonne", "Chalon-sur-Saône", "Albi", 
+    "Ajaccio", "Périgueux", "Vannes", "Sète", "Tarbes", "Troyes", "Beauvais", "Saint-Malo", 
+    "Colmar", "Nevers", "Saint-Denis", "Le Mans"
+]
+

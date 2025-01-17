@@ -3,7 +3,6 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import axios from 'axios';
 
 interface RouteResponse {
   responsesmodel: Array<JSON>;
@@ -102,7 +101,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses }) => {
     try {
       headers.append('Content-Type', 'application/json');
       headers.append('Accept', 'application/json');
-      headers.append('Origin','http://localhost:5000');
+      headers.append('Origin','http://127.0.0.1:5000');
 
       const response = await fetch('http://127.0.0.1:5000/api/route', {
         method: 'POST',

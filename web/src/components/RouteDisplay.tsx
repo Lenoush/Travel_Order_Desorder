@@ -37,7 +37,10 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses }) => {
     };
   }, [responses]);
 
-  const routeModel = responses.responsesmodel || [] ;
+  const routeModel = (responses.responsesmodel || []).sort((a, b) => {
+    const order = { DEPART: 1, CORRESPONDANCE: 2, ARRIVEE: 3 };
+    return (order[a.label] || 0) - (order[b.label] || 0);
+  }, []);
 
   return (
     <div ref={containerRef} className="relative py-8 space-y-16">

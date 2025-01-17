@@ -81,7 +81,7 @@ def evaluate_model(nlp, validation_data: List[Tuple[str, dict]]) -> None:
     # print(f"Index Accuracy for phrase: {index_accuracy:.2%}")
 
     # # Calculate accuracy
-    accuracy = correct_phrases / total_phrases if total_phrases > 0 else 0
+    accuracy = (correct_phrases / total_phrases)*100 if total_phrases > 0 else 0
     # print(f"\n=== Résumé de l'évaluation ===")
     # print(f"Total phrases: {total_phrases}")
     # print(f"Phrases correctes: {correct_phrases}")
