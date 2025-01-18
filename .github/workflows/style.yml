@@ -19,9 +19,9 @@ jobs:
       with:
         python-version: '3.x'
 
-    # - name: Install dependencies
-    #   run: |
-    #     pip install black ruff
+    - name: Install dependencies
+      run: |
+        pip install black ruff
 
     # - name: Black Check
     #   shell: bash
