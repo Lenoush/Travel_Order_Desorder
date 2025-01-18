@@ -1,9 +1,7 @@
 import ast
 import pandas as pd
-import spacy
 from typing import List, Tuple
 
-from config import Valid_vierge, Test_vierge
 
 def load_data(valid_file: str):
     valid_ = []
