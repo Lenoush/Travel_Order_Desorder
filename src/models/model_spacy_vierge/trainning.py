@@ -82,7 +82,7 @@ class SpacyNERTrainer_vierge(Trainner):
         return False
 
     def train_spacy(
-        self, iterations: int = 100, batch_size: int = 20, patience: int = 10
+        self, iterations: int = 100, batch_size: int = 20, patience: int = 20
     ) -> spacy.language.Language:
         """
         Train the SpaCy NER model with a blank pipeline using the loaded training data.
@@ -114,7 +114,6 @@ class SpacyNERTrainer_vierge(Trainner):
             losses = {}
             for batch in spacy.util.minibatch(examples, size=batch_size):
                 self.nlp.update(batch, drop=0.05, losses=losses)
-            # print(f"Iteration {itn + 1}, Losses: {losses}")
 
             current_loss = losses.get("ner", float("inf"))
             losses_per_iteration.append(current_loss)
@@ -150,7 +149,7 @@ if __name__ == "__main__":
     best_accurancy = 0.0
 
     for epoch in tqdm(range(10), desc="Training epochs", unit="epoch"):
-        model, loss = trainer.train_spacy(iterations=100, batch_size=100)
+        model, loss = trainer.train_spacy(iterations=100, batch_size=50)
         accurancy = evaluate_model(model, valid)
 
         tqdm.write(f"[Epoch {epoch + 1}] Loss: {loss:.4f}, Accuracy: {accurancy:.4f}")

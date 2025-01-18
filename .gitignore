@@ -8,3 +8,5 @@
 **/*.csv
 /config.py
 **/*.png
+
+web/node_modules/

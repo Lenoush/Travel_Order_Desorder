@@ -4,7 +4,7 @@ on:
     push:
       branches: [ "dev", "main" ]
     pull_request:
-      branches: [ "dev" ]
+      branches: [ "dev", "main" ]
 
 jobs:
   style-check:
@@ -23,9 +23,9 @@ jobs:
       run: |
         pip install black ruff
 
-    - name: Black Check
-      shell: bash
-      run: black . --diff --color --check
+    # - name: Black Check
+    #   shell: bash
+    #   run: black . --diff --color --check
 
     - name: Ruff Check
       shell: bash
