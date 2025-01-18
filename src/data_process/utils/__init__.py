@@ -3,7 +3,8 @@ from src.data_process.utils.utils import (
     merge_datasets,
     load_data,
     load_sncf_data,
-    simple_cleaning
+    simple_cleaning,
+    check_label
 )
 
 from src.data_process.utils.utils_train import (
@@ -24,4 +25,5 @@ __all__ = [
     "RGR_vierge",
     "RGE_vierge",
     "simple_cleaning",
+    "check_label",
 ]

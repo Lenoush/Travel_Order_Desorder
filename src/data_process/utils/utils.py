@@ -115,13 +115,44 @@ def simple_cleaning(phrase: str) -> str:
     """
     Cleans a phrase by removing any parentheses and leading/trailing whitespace.
     """
-    # Remove any ponctuation
-    # cleaned_phrase = re.sub(r"[^\w\s]", "", phrase)
-    cleaned_phrase = phrase
+    # Remove any ponctuation, except apostrophe
+    cleaned_phrase = re.sub(r"[^\w\s']", "", phrase)
+
     # Remove any accents
-    cleaned_phrase = unidecode(cleaned_phrase)
+    cleaned_phrase = unidecode(phrase)
+
+    # Case of "d'" : replace by "de"
+    if " d'" in cleaned_phrase:
+        cleaned_phrase = cleaned_phrase.replace(" d'", " de ")
 
     # Add point a la fin de chaque phrase
     cleaned_phrase = cleaned_phrase + "."
 
     return cleaned_phrase
+
+def check_label(predict):
+    """
+    Check if the label of the entity is a city
+    """
+    erreur = []
+    count_depart = 0
+    count_arrival = 0
+    count_correspondance = 0
+    for entity in predict:
+        if entity["label"] == "DEPART":
+            count_depart += 1
+        elif entity["label"] == "ARRIVEE":
+            count_arrival += 1
+        elif entity["label"] == "CORRESPONDANCE":
+            count_correspondance += 1
+
+    if count_depart == 0 and count_arrival == 0:
+        erreur.append("No departure city and arrival city found")
+        return predict, erreur
+
+    if count_depart == 0 :
+        erreur.append("No departure city found")
+    if count_arrival == 0 :
+        erreur.append("No arrival city found")
+
+    return predict, erreur

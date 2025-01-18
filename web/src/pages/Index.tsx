@@ -1,15 +1,12 @@
 import { useState } from 'react';
 import RouteInput from '@/components/RouteInput';
 import RouteDisplay from '@/components/RouteDisplay';
-import { parse } from 'path';
+import { RouteResponse } from '@/types';
 
 const Index = () => {
-  interface RouteResponse {
-    responsesmodel: Array<JSON>;
-    text: string;
-  }
 
   const [responses, setResponses] = useState<RouteResponse[]>([]);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 p-6">
@@ -21,10 +18,10 @@ const Index = () => {
           </p>
         </div>
 
-        <RouteInput setResponses={setResponses} />
+        <RouteInput setResponses={setResponses} setHasInteracted={setHasInteracted} />
 
         <div className="bg-white/30 backdrop-blur rounded-xl p-6 shadow-lg">
-          <RouteDisplay responses={responses} />
+          <RouteDisplay responses={responses} hasInteracted={hasInteracted} />
         </div>
       </div>
     </div>

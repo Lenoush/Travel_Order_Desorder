@@ -3,17 +3,14 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-
-interface RouteResponse {
-  responsesmodel: Array<JSON>;
-  text: string;
-}
+import { RouteResponse } from '@/types';
 
 interface RouteInputProps {
   setResponses: React.Dispatch<React.SetStateAction<RouteResponse[]>>;
+  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const RouteInput: React.FC<RouteInputProps> = ({ setResponses }) => {
+const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}) => {
   const [isRecording, setIsRecording] = useState(false);
   const [routeText, setRouteText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -116,6 +113,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses }) => {
       const responses = await response.json();
       console.log(responses); 
       setResponses(responses);
+      setHasInteracted(true);
 
     } catch (error) {
       console.error('Error:', error, body);
