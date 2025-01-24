@@ -129,8 +129,8 @@ def simple_cleaning(phrase: str) -> str:
     # Add point a la fin de chaque phrase
     cleaned_phrase = cleaned_phrase + "."
 
-    # Lemmatize the phrase
-    
+    # everinthing in lower case
+    cleaned_phrase = cleaned_phrase.lower()
 
     return cleaned_phrase
 
