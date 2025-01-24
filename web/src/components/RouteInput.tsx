@@ -10,7 +10,7 @@ interface RouteInputProps {
   setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}) => {
+const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [routeText, setRouteText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -66,14 +66,14 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}
     const draw = () => {
       if (!isRecording) return;
       analyserRef.current?.getByteFrequencyData(dataArray);
-      
+
       // Take only a portion of the frequency data for visualization
       const visualData = Array.from(dataArray.slice(0, 20)).map(value => value / 255);
       setAudioData(visualData);
-      
+
       animationFrameRef.current = requestAnimationFrame(draw);
     };
-    
+
     draw();
   };
 
@@ -94,24 +94,24 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}
     let headers = new Headers();
 
     const body = JSON.stringify({ text: routeText });
-  
+    const API_URL = import.meta.env.VITE_API_URL;
+
     try {
       headers.append('Content-Type', 'application/json');
       headers.append('Accept', 'application/json');
-      headers.append('Origin','http://127.0.0.1:5000');
 
-      const response = await fetch('http://127.0.0.1:5000/api/route', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers,
-        body, 
+        body,
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch');
       }
-  
+
       const responses = await response.json();
-      console.log(responses); 
+      console.log(responses);
       setResponses(responses);
       setHasInteracted(true);
 
@@ -148,7 +148,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}
           </Button>
         </div>
       </div>
-      
+
       {isRecording && (
         <div className="h-16 bg-gray-50 rounded-lg p-2 flex items-center justify-center gap-1 overflow-hidden">
           {audioData.map((value, index) => (
@@ -163,9 +163,9 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted}
           ))}
         </div>
       )}
-      
-      <Button 
-        onClick={handleSubmit} 
+
+      <Button
+        onClick={handleSubmit}
         className="w-full"
         disabled={!routeText.trim() || isProcessing}
       >

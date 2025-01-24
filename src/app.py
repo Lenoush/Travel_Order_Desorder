@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS 
 import spacy
 
-from src.data_process.utils import simple_cleaning, check_label
+from src.data_process.utils import simple_cleaning, check_label, detected_language
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origin": "*"}})
@@ -19,18 +19,23 @@ def process_route():
     if not text: # ARROR CASE IF NOT TEXT : SHOULD NOT CLICK ON BUTTON IF SO USEFUL ? 
         return jsonify({"error": "No text provided"}), 400
 
-    # Clean the text
-    text_cleaned = simple_cleaning(text)
-    
-    # Predict entities
-    doc = nlp(text_cleaned)
-    predicted_entities = [
-        {"start": ent.start_char, "end": ent.end_char, "label": ent.label_}
-        for ent in doc.ents
-    ]
+    # Deectect langage of the text
+    is_french = detected_language(text)
+    if  is_french : 
+        # Clean the text
+        text_cleaned = simple_cleaning(text)
 
-    # Check label of entities
-    predicted_entities, error = check_label(predicted_entities)
+        # Predict entities
+        doc = nlp(text_cleaned)
+        predicted_entities = [
+            {"start": ent.start_char, "end": ent.end_char, "label": ent.label_}
+            for ent in doc.ents
+        ]
+
+        # Check label of entities
+        predicted_entities, error = check_label(predicted_entities)
+    else : 
+        error = ["The language of the text is not French"]
 
     if error == []:
         # Format the responses

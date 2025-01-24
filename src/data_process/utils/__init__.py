@@ -4,7 +4,8 @@ from src.data_process.utils.utils import (
     load_data,
     load_sncf_data,
     simple_cleaning,
-    check_label
+    check_label,
+    detected_language
 )
 
 from src.data_process.utils.utils_train import (
@@ -26,4 +27,5 @@ __all__ = [
     "RGE_vierge",
     "simple_cleaning",
     "check_label",
+    "detected_language",
 ]

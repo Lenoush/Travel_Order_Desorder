@@ -136,8 +136,8 @@ class SpacyNERTrainer_vierge(Trainner):
 if __name__ == "__main__":
 
     trainer = SpacyNERTrainer_vierge()
-    train = trainer.load_data(train_file=Train_vierge)
     valid = trainer.load_data(train_file=Valid_vierge, train=False)
+    trainer.load_data(train_file=Train_vierge)
 
     date_today = datetime.today().strftime("%Y-%m-%d")
     output_dir = Output_model + f"model_spacy_vierge/{date_today}_trained.model"
@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
     best_model = None
     best_loss = float("inf")
-    best_accurancy = 0.0
+    best_accurancy = 0.0 
 
     for epoch in tqdm(range(10), desc="Training epochs", unit="epoch"):
         model, loss = trainer.train_spacy(iterations=100, batch_size=50)
