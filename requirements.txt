@@ -10,3 +10,5 @@ spacy~=3.8.2
 
 scikit-learn~=1.5.2
 setuptools~=75.2.0
+
+langid

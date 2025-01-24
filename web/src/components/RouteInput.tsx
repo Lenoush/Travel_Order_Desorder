@@ -3,12 +3,14 @@ import { Mic, MicOff, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { RouteResponse } from '@/types';
 
 interface RouteInputProps {
-  onRouteSubmit: (route: string) => void;
+  setResponses: React.Dispatch<React.SetStateAction<RouteResponse[]>>;
+  setHasInteracted: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
+const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [routeText, setRouteText] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -17,6 +19,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
   const chunksRef = useRef<Blob[]>([]);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number>();
+
 
   useEffect(() => {
     return () => {
@@ -46,7 +49,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
-        simulateTranscription();
       };
 
       mediaRecorder.start();
@@ -64,14 +66,14 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
     const draw = () => {
       if (!isRecording) return;
       analyserRef.current?.getByteFrequencyData(dataArray);
-      
+
       // Take only a portion of the frequency data for visualization
       const visualData = Array.from(dataArray.slice(0, 20)).map(value => value / 255);
       setAudioData(visualData);
-      
+
       animationFrameRef.current = requestAnimationFrame(draw);
     };
-    
+
     draw();
   };
 
@@ -87,19 +89,37 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
     }
   };
 
-  const simulateTranscription = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setRouteText(prev => prev + "New York to Los Angeles via Chicago");
-      setIsProcessing(false);
-    }, 1500);
-  };
+  const handleSubmit = async () => {
+    if (!routeText.trim()) return;
+    let headers = new Headers();
 
-  const handleSubmit = () => {
-    if (routeText.trim()) {
-      onRouteSubmit(routeText);
+    const body = JSON.stringify({ text: routeText });
+    const API_URL = import.meta.env.VITE_API_URL;
+
+    try {
+      headers.append('Content-Type', 'application/json');
+      headers.append('Accept', 'application/json');
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers,
+        body,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch');
+      }
+
+      const responses = await response.json();
+      console.log(responses);
+      setResponses(responses);
+      setHasInteracted(true);
+
+    } catch (error) {
+      console.error('Error:', error, body);
     }
   };
+
 
   return (
     <div className="space-y-4 w-full max-w-2xl mx-auto">
@@ -128,7 +148,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
           </Button>
         </div>
       </div>
-      
+
       {isRecording && (
         <div className="h-16 bg-gray-50 rounded-lg p-2 flex items-center justify-center gap-1 overflow-hidden">
           {audioData.map((value, index) => (
@@ -143,9 +163,9 @@ const RouteInput: React.FC<RouteInputProps> = ({ onRouteSubmit }) => {
           ))}
         </div>
       )}
-      
-      <Button 
-        onClick={handleSubmit} 
+
+      <Button
+        onClick={handleSubmit}
         className="w-full"
         disabled={!routeText.trim() || isProcessing}
       >

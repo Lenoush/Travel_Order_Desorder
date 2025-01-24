@@ -19,6 +19,7 @@ from data.data_need import (
     data_question,
     data_direct,
     data_unique,
+    date_phrase_simple,
 )
 from config import (
     Dataset_train,
@@ -76,7 +77,7 @@ class BuildDataset:
             )
             processed_question: List[Tuple[str, dict]] = RGR_vierge(data_question)
             processed_direct: List[Tuple[str, dict]] = RGR_vierge(data_direct)
-            # processed_error:List[Tuple[str, dict]] = RGE_vierge(data_error)
+            processed_courte: List[Tuple[str, dict]] = RGR_vierge(date_phrase_simple)
         else:
             processed_actif: List[Tuple[str, dict]] = RGR_train(data_actif_with)
             processed_actif_without: List[Tuple[str, dict]] = RGR_train(
@@ -84,14 +85,14 @@ class BuildDataset:
             )
             processed_question: List[Tuple[str, dict]] = RGR_train(data_question)
             processed_direct: List[Tuple[str, dict]] = RGR_train(data_direct)
-            # processed_error:List[Tuple[str, dict]] = RGE_train(data_error)
+            processed_courte: List[Tuple[str, dict]] = RGR_train(date_phrase_simple)
 
         merged_data: List[str] = merge_datasets(
             processed_actif,
             processed_question,
             processed_actif_without,
-            # processed_error,
             processed_direct,
+            processed_courte,
         )
 
         write_data_to_csv(merged_data, self.dataset_path)
