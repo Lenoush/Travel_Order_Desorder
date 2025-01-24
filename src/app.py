@@ -36,7 +36,7 @@ def process_route():
         # Check label of entities
         predicted_entities, error = check_label(predicted_entities)
     else : 
-        error = ["The language of the text is not French"]
+        error = ["NOT_FRENCH"]
 
     if error == []:
         # Format the responses
