@@ -100,17 +100,38 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
       headers.append('Content-Type', 'application/json');
       headers.append('Accept', 'application/json');
 
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers,
-        body,
-      });
+      const { text } = JSON.parse(body);
+      const lines = text.split("\n");
+      const responses: RouteResponse[] = [];
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch');
+      for (let i = 0; i < lines.length; i++) {
+        let ID = 0;
+        let text = lines[i];
+
+        if (text.includes(",") && /^\d/.test(text)) {
+          [ID, text] = text.split(",", 2); 
+        }
+
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch');
+        }
+
+        const one_responses = await response.json();
+        const responseWithID: RouteResponse = {
+          IDsentence: ID,
+          responsesmodel: one_responses.responsesmodel,
+          text: one_responses.text,
+        };
+
+        responses.push(responseWithID);
       }
 
-      const responses = await response.json();
       console.log(responses);
       setResponses(responses);
       setHasInteracted(true);
