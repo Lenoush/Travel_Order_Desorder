@@ -7,6 +7,7 @@ from typing import List
 import pandas as pd
 import requests
 from unidecode import unidecode
+import langid
 
 from data.data_need import ville_sans_gare, villes_france
 from config import SNCF_gare
@@ -128,6 +129,9 @@ def simple_cleaning(phrase: str) -> str:
     # Add point a la fin de chaque phrase
     cleaned_phrase = cleaned_phrase + "."
 
+    # Lemmatize the phrase
+    
+
     return cleaned_phrase
 
 def check_label(predict):
@@ -156,3 +160,15 @@ def check_label(predict):
         erreur.append("No arrival city found")
 
     return predict, erreur
+
+def detected_language(text: str) -> bool:
+    """
+    Vérifie si le texte est en français, en combinant détection automatique et mots-clés.
+    """
+    common_french_words = {"le", "la", "je", "tu", "vous", "et", "à", "de"}
+    if any(word in text.lower() for word in common_french_words):
+        return True
+
+    # Détection automatique
+    detected_language, _ = langid.classify(text)
+    return detected_language == "fr"

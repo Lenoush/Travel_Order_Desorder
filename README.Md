@@ -7,7 +7,7 @@ pip install -r requirements.txt
 ```
 
 ## Path 
-Se créer un fichier config avec : 
+Se créer un fichier config.py avec : 
 ```
 SNCF_gare = "path_you_want.csv"
 
@@ -22,8 +22,11 @@ Valid_vierge  = "path_you_want.csv"
 Test_vierge  = "path_you_want.csv"
 
 Output_model  = "path_you_want.csv"
-
 ```
+Se créer un fichier web/.env avec : 
+````
+VITE_API_URL=http://IP:PORT/api/route
+````
 
 ## How to use 
 Pour obtenir le dataset complet , SNCF , et les splits dataset :

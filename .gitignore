@@ -10,3 +10,5 @@
 **/*.png
 
 web/node_modules/
+
+.env
