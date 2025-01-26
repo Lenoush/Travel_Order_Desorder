@@ -25,6 +25,7 @@ def process_route():
     if  is_french : 
         # Clean the text
         text_cleaned = simple_cleaning(text)
+        text_cleaned = text_cleaned.lower()
 
         # Predict entities
         doc = nlp(text_cleaned)

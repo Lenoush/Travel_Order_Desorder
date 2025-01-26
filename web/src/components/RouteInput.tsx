@@ -102,11 +102,13 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
 
       const { text } = JSON.parse(body);
       const lines = text.split("\n");
+      const filteredLines = lines.filter(line => line.trim() !== '');
       const responses: RouteResponse[] = [];
 
-      for (let i = 0; i < lines.length; i++) {
+      for (let i = 0; i < filteredLines.length; i++) {
         let ID = 0;
-        let text = lines[i];
+        let text = filteredLines[i];
+        console.log("kgvtg",text);
 
         if (text.includes(",") && /^\d/.test(text)) {
           [ID, text] = text.split(",", 2); 

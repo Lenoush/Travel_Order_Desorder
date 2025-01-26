@@ -2,6 +2,7 @@ from typing import List
 from matplotlib import pyplot as plt
 import spacy
 from config import Output_model
+from datetime import datetime
 
 
 class Trainner:
@@ -51,13 +52,14 @@ class Trainner:
         plt.legend()
         plt.grid(True)
 
+        current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
         if self.model_size == "vierge":
             output_path = (
-                Output_model + f"model_spacy_vierge/{self.model_size}_train_losses.png"
+            Output_model + f"model_spacy_vierge/{self.model_size}_train_losses_{current_date}.png"
             )
         else:
             output_path = (
-                Output_model + f"model_spacy/{self.model_size}_train_losses.png"
+            Output_model + f"model_spacy/{self.model_size}_train_losses.png"
             )
         plt.savefig(output_path)
         plt.close()

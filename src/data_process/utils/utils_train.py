@@ -16,7 +16,7 @@ def replace_and_generate_response(dataset: List[str]) -> List[List[str]]:
 
 
     for phrase in dataset:
-        for _ in range(50):
+        for _ in range(10):
             reponse = [None, None, None]
             modified_phrase = phrase
 
@@ -25,10 +25,12 @@ def replace_and_generate_response(dataset: List[str]) -> List[List[str]]:
             for match in re.finditer(r"\b[XYC]\b", modified_phrase):
                 stripped_word = match.group()
 
-                if not words_to_use.empty():
-                    random_city = random.choice(words_to_use)
-                else :
+                if words_to_use == []:
                     random_city = random.choice(villes_france).lower()
+                    villes_france.remove(random_city)
+                else :
+                    random_city = random.choice(words_to_use)
+                    words_to_use.remove(random_city)
 
                 start_idx = match.start() + offset
                 end_idx = match.end() + offset

@@ -126,12 +126,6 @@ def simple_cleaning(phrase: str) -> str:
     if " d'" in cleaned_phrase:
         cleaned_phrase = cleaned_phrase.replace(" d'", " de ")
 
-    # Add point a la fin de chaque phrase
-    cleaned_phrase = cleaned_phrase + "."
-
-    # everinthing in lower case
-    cleaned_phrase = cleaned_phrase.lower()
-
     return cleaned_phrase
 
 def check_label(predict):
