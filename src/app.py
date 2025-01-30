@@ -1,8 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
+from werkzeug.utils import secure_filename
+import os
 import spacy
 
 from src.data_process.utils import simple_cleaning, check_label, detected_language
+from src.voice_process.hear_voice import process_m4a_file
 from config import model_used_path
 
 app = Flask(__name__)
@@ -50,6 +53,38 @@ def process_route():
         responses = error
 
     return jsonify({"text": text, "responsesmodel": responses})
+
+
+
+# Configurer le répertoire pour stocker temporairement les fichiers
+app.config['UPLOAD_FOLDER'] = './uploads'
+app.config['ALLOWED_EXTENSIONS'] = {'m4a'}
+
+# Vérifier les extensions autorisées
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+@app.route('/api/convert_audio', methods=['POST'])
+def convert_audio():
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "Aucun fichier sélectionné."}), 400
+    
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+
+        # Traiter le fichier m4a
+        transcribed_text = process_m4a_file(filepath)
+
+        if transcribed_text:
+            return jsonify({"transcribedText": transcribed_text})
+        else:
+            return jsonify({"error": "Échec de la transcription."}), 500
+    else:
+        return jsonify({"error": "Format de fichier non autorisé."}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

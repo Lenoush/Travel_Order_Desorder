@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -89,12 +89,46 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
     }
   };
 
+  // const stopRecording = async () => {
+  //   let headers = new Headers();
+  //   const API_URL = import.meta.env.VITE_API_URL_VOICE;
+
+  //   stopRecording !!!
+
+  //     try {
+  //       headers.append('Content-Type', 'multipart/form-data');
+  //       headers.append('Accept', 'application/json');
+
+  //       const formData = new FormData();
+  //       formData.append('file', audioBlob, 'recording.m4a');
+
+  //       console.log(formData);
+  //       const response = await fetch(API_URL, {
+  //         method: 'POST',
+  //         headers,
+  //         body: formData,
+  //       });
+  //       console.log(response);
+
+  //       if (response.ok) {
+  //         const data = await response.json();
+  //         setRouteText(data.transcribedText);
+  //       } else {
+  //         toast.error('Erreur lors de la transcription');
+  //       }
+  //     } catch (error) {
+  //       toast.error("Une erreur est survenue lors de l'envoi du fichier.");
+  //     }
+  //   }
+  // };
+
+
   const handleSubmit = async () => {
     if (!routeText.trim()) return;
     let headers = new Headers();
 
     const body = JSON.stringify({ text: routeText });
-    const API_URL = import.meta.env.VITE_API_URL;
+    const API_URL = import.meta.env.VITE_API_URL_MODEL;
 
     try {
       headers.append('Content-Type', 'application/json');
@@ -108,10 +142,9 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
       for (let i = 0; i < filteredLines.length; i++) {
         let ID = 0;
         let text = filteredLines[i];
-        console.log("kgvtg",text);
 
         if (text.includes(",") && /^\d/.test(text)) {
-          [ID, text] = text.split(",", 2); 
+          [ID, text] = text.split(",", 2);
         }
 
         const response = await fetch(API_URL, {
@@ -160,6 +193,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
             onClick={isRecording ? stopRecording : startRecording}
             className="rounded-full"
             disabled={isProcessing}
+            title={isRecording ? "Arrêter l'enregistrement" : "Commencer l'enregistrement"}
           >
             {isProcessing ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -168,6 +202,63 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
             ) : (
               <Mic className="h-5 w-5" />
             )}
+          </Button>
+        </div>
+
+        <div className="absolute right-14 bottom-2">
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={() => document.getElementById('fileInput')?.click()}
+            className="rounded-full"
+            disabled={isProcessing}
+            title="Télécharger un fichier txt ou m4a"
+          >
+            <Upload className="w-5 h-5" />
+            <input
+              type="file"
+              id="fileInput"
+              accept=".txt, .m4a"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  if (!file.name.endsWith(".txt") && !file.name.endsWith(".m4a")) {
+                    alert("Erreur : Seuls les fichiers .txt ou .m4a sont autorisés !");
+                    return;
+                  }
+
+                  if (file.name.endsWith(".txt")) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                      if (event.target?.result) {
+                        setRouteText(event.target.result as string);
+                      }
+                    };
+                    reader.readAsText(file);
+                    return;
+                  }
+
+                  if (file.name.endsWith(".m4a")) {
+                    console.log("m4a file");
+                    //  APPELLE API THOMAS 
+
+                  }
+                }
+              }}
+            />
+          </Button>
+        </div>
+        <div className="absolute right-28 bottom-2">
+          <Button
+            size="icon"
+            variant="secondary"
+            onClick={() => setRouteText('')}
+            className="rounded-full"
+            disabled={isProcessing || !routeText}
+            title="Effacer le texte du trajet"
+          >
+            <X className="w-5 h-5" />
           </Button>
         </div>
       </div>
