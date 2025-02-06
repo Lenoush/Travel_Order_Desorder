@@ -3,12 +3,13 @@ from flask_cors import CORS
 import spacy
 
 from src.data_process.utils import simple_cleaning, check_label, detected_language
+from config import model_used_path
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origin": "*"}})
 
 
-nlp = spacy.load("src/models/model_spacy_vierge/2025-01-17_trained.model")
+nlp = spacy.load(model_used_path)
 
 @app.route('/api/route', methods=['POST'])
 def process_route():
@@ -35,7 +36,7 @@ def process_route():
         # Check label of entities
         predicted_entities, error = check_label(predicted_entities)
     else : 
-        error = ["The language of the text is not French"]
+        error = ["NOT_FRENCH"]
 
     if error == []:
         # Format the responses
