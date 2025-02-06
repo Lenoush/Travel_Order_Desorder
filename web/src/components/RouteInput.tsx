@@ -212,7 +212,10 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
         <Button
           size="icon"
           variant={isRecording ? "destructive" : "secondary"}
-          onClick={isRecording ? stopRecording : startRecording}
+          onClick={() => {
+            setRouteText('');
+            isRecording ? stopRecording() : startRecording();
+          }}
           className="rounded-full"
           disabled={isProcessing}
         >
@@ -228,7 +231,10 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
         <Button
           size="icon"
           variant="secondary"
-          onClick={() => document.getElementById('fileInput')?.click()}
+          onClick={() => {
+            setRouteText('');
+            document.getElementById('fileInput')?.click()
+          }}
           className="rounded-full"
           disabled={isProcessing}
           title="Télécharger un fichier txt ou m4a"
@@ -242,6 +248,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
             onChange={async (e) => {
               const file = e.target.files?.[0];
               if (file) {
+
                 if (!file.name.endsWith(".txt") && !file.name.endsWith(".m4a")) {
                   alert("Erreur : Seuls les fichiers .txt ou .m4a sont autorisés !");
                   return;

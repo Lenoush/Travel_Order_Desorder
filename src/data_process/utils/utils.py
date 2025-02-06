@@ -135,23 +135,22 @@ def check_label(predict):
     erreur = []
     count_depart = 0
     count_arrival = 0
-    count_correspondance = 0
     for entity in predict:
         if entity["label"] == "DEPART":
             count_depart += 1
         elif entity["label"] == "ARRIVEE":
             count_arrival += 1
-        elif entity["label"] == "CORRESPONDANCE":
-            count_correspondance += 1
 
     if count_depart == 0 and count_arrival == 0:
         erreur.append("NOT_TRIP")
         return predict, erreur
 
-    if count_depart == 0 :
-        erreur.append("NOT_TRIP : No departure")
-    if count_arrival == 0 :
-        erreur.append("NOT_TRIP : No arrival ")
+    if count_depart == 0  or count_arrival == 0:
+        erreur.append("NOT_TRIP")
+    if count_depart > 1:
+        erreur.append("MULTIPLE_DEPART")
+    if count_arrival > 1:
+        erreur.append("MULTIPLE_ARRIVAL")
 
     return predict, erreur
 
