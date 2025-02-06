@@ -2,7 +2,6 @@ import ast
 import pandas as pd
 from typing import List, Tuple
 
-
 def load_data(valid_file: str):
     valid_ = []
 
@@ -54,11 +53,6 @@ def evaluate_model(nlp, validation_data: List[Tuple[str, dict]]) -> None:
 
         if not false_positives and not false_negatives:
             correct_phrases += 1
-        # else:
-        #     print(f"Phrase: {text}")
-        #     print(f"Attendu (Expected): {expected_entities}")
-        #     print(f"Prédit (Predicted): {predicted_entities}")
-        #     print("-" * 50)
 
         # Calculate accuracy based on correct entity indices, ignoring entity labels
         total_indices += len(annotations["entities"])
@@ -71,25 +65,15 @@ def evaluate_model(nlp, validation_data: List[Tuple[str, dict]]) -> None:
                     correct_indices += 1
                     break
 
-    # # Calculate index accuracy
-    # index_accuracy = correct_indices / total_indices if total_indices > 0 else 0
-    # print("\n=== Evaluation des indices ===")
-    # print(f"Total indices: {total_indices}")
-    # print(f"Indices corrects: {correct_indices}")
-    # print(f"Index Accuracy for phrase: {index_accuracy:.2%}")
-
     # # Calculate accuracy
     accuracy = (correct_phrases / total_phrases)*100 if total_phrases > 0 else 0
-    # print(f"\n=== Résumé de l'évaluation ===")
-    # print(f"Total phrases: {total_phrases}")
-    # print(f"Phrases correctes: {correct_phrases}")
-    # print(f"Accuracy: {accuracy:.2%}")
     return accuracy
 
 
-# output_dir = "src/models/model_spacy_vierge/2025-01-09_trained.model"
-# nlp = spacy.load(output_dir)
+# import spacy
+# from config import model_used_path, Test_vierge, Valid_vierge
 
+# nlp = spacy.load(model_used_path)
 # data_test = load_data(Test_vierge)
 # data_valid = load_data(Valid_vierge)
 # acc_test = evaluate_model(nlp, data_test)

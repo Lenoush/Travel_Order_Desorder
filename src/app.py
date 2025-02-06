@@ -1,9 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS 
+from werkzeug.utils import secure_filename
+import os
 import spacy
 
 from src.data_process.utils import simple_cleaning, check_label, detected_language
-from config import model_used_path
+from src.voice_process.hear_voice import process_m4a_file
+from config import model_used_path, UPLOAD_FOLDER
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origin": "*"}})
@@ -25,6 +28,7 @@ def process_route():
     if  is_french : 
         # Clean the text
         text_cleaned = simple_cleaning(text)
+        text_cleaned = text_cleaned.lower()
 
         # Predict entities
         doc = nlp(text_cleaned)
@@ -49,6 +53,27 @@ def process_route():
         responses = error
 
     return jsonify({"text": text, "responsesmodel": responses})
+
+@app.route('/api/convert_audio', methods=['POST'])
+def convert_audio():
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "Aucun fichier sélectionné."}), 400
+
+    if file :
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(filepath)
+
+        transcribed_text = process_m4a_file(filepath)
+
+        if transcribed_text:
+            return jsonify({"transcribedText": transcribed_text})
+        else:
+            return jsonify({"error": "Échec de la transcription."}), 500
+    else:
+        return jsonify({"error": "Format de fichier non autorisé."}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)

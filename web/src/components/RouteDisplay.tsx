@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { RouteResponse, RouteItem } from '@/types';
 
@@ -9,6 +9,7 @@ interface RouteDisplayProps {
 
 const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showFormatted, setShowFormatted] = useState(false);
 
   useEffect(() => {
     if (containerRef.current) {
@@ -56,6 +57,24 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
 
   return (
     <div ref={containerRef} className="relative py-8 space-y-16">
+      <div className="bg-gray-100 p-4 rounded-lg shadow-lg">
+        <h2
+          className="text-lg font-bold"
+          onClick={() => setShowFormatted((prev) => !prev)}
+          style={{ cursor: 'pointer' }}
+        >
+          Formatted Sentences
+        </h2>
+        {showFormatted && (
+          <div className="space-y-2">
+            {formattedResponses.map((formatted, index) => (
+              <p key={index} className="text-gray-800">
+                {formatted}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
       {responses.length > 0 ? (
         responses.map((response, responseIndex) => {
           const isModelValid =
@@ -67,9 +86,9 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
 
           const routeModel = isModelValid
             ? (response.responsesmodel as RouteItem[]).sort((a, b) => {
-                const order = { DEPART: 1, CORRESPONDANCE: 2, ARRIVEE: 3 };
-                return (order[a.label] || 0) - (order[b.label] || 0);
-              })
+              const order = { DEPART: 1, CORRESPONDANCE: 2, ARRIVEE: 3 };
+              return (order[a.label] || 0) - (order[b.label] || 0);
+            })
             : [];
 
           const errorMessages = !isModelValid
@@ -79,6 +98,7 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
           return (
             <div key={responseIndex} className="space-y-8">
               <h2 className="text-xl font-bold">{responseIndex + 1} : ID Sentence {response.IDsentence}</h2>
+              <p>"{response.text}"</p>
               {isModelValid ? (
                 routeModel.map((city, cityIndex) => (
                   <motion.div
@@ -89,13 +109,12 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
                     transition={{ delay: cityIndex * 0.1 }}
                   >
                     <div
-                      className={`city-dot ${
-                        cityIndex === 0
+                      className={`city-dot ${cityIndex === 0
                           ? 'start'
                           : cityIndex === routeModel.length - 1
-                          ? 'end'
-                          : ''
-                      }`}
+                            ? 'end'
+                            : ''
+                        }`}
                     />
                     <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-lg flex-1">
                       <h3 className="text-lg font-semibold">{city.word}</h3>
@@ -131,16 +150,6 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
       ) : (
         <div></div>
       )}
-      <div className="bg-gray-100 p-4 rounded-lg shadow-lg">
-        <h2 className="text-lg font-bold">Formatted Sentences</h2>
-        <div className="space-y-2">
-          {formattedResponses.map((formatted, index) => (
-            <p key={index} className="text-gray-800">
-              {formatted}
-            </p>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
