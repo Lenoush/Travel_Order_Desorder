@@ -23,6 +23,8 @@ Test_vierge  = "path_you_want.csv"
 
 Output_model  = "path_you_want.csv"
 model_used_path = "path_model_you_want_to_use.model"
+
+UPLOAD_FOLDER = ""
 ```
 
 

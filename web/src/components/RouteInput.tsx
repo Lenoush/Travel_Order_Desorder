@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { RouteResponse } from '@/types';
+import { set } from 'date-fns';
 
 interface RouteInputProps {
   setResponses: React.Dispatch<React.SetStateAction<RouteResponse[]>>;
@@ -88,40 +89,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
       }
     }
   };
-
-  // const stopRecording = async () => {
-  //   let headers = new Headers();
-  //   const API_URL = import.meta.env.VITE_API_URL_VOICE;
-
-  //   stopRecording !!!
-
-  //     try {
-  //       headers.append('Content-Type', 'multipart/form-data');
-  //       headers.append('Accept', 'application/json');
-
-  //       const formData = new FormData();
-  //       formData.append('file', audioBlob, 'recording.m4a');
-
-  //       console.log(formData);
-  //       const response = await fetch(API_URL, {
-  //         method: 'POST',
-  //         headers,
-  //         body: formData,
-  //       });
-  //       console.log(response);
-
-  //       if (response.ok) {
-  //         const data = await response.json();
-  //         setRouteText(data.transcribedText);
-  //       } else {
-  //         toast.error('Erreur lors de la transcription');
-  //       }
-  //     } catch (error) {
-  //       toast.error("Une erreur est survenue lors de l'envoi du fichier.");
-  //     }
-  //   }
-  // };
-
 
   const handleSubmit = async () => {
     if (!routeText.trim()) return;
@@ -220,7 +187,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
               id="fileInput"
               accept=".txt, .m4a"
               style={{ display: 'none' }}
-              onChange={(e) => {
+              onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (file) {
                   if (!file.name.endsWith(".txt") && !file.name.endsWith(".m4a")) {
@@ -240,15 +207,33 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
                   }
 
                   if (file.name.endsWith(".m4a")) {
-                    console.log("m4a file");
-                    //  APPELLE API THOMAS 
+                    const API_URL = import.meta.env.VITE_API_URL_VOICE;
+                    const formData = new FormData();
+                    formData.append('file', file, file.name);
 
+                    try {
+                      const response = await fetch(API_URL, {
+                        method: 'POST',
+                        body: formData,
+                      });
+                      if (response.ok) {
+                        const data = await response.json();
+                        setRouteText(data.transcribedText);
+                      } else {
+                        toast.error('Erreur lors de la transcription');
+                      }
+                    }
+                    catch (error) {
+                      console.error(error);
+                    toast.error("Une erreur est survenue lors de l'envoi du fichier.");
+                    }
                   }
-                }
-              }}
+                }}
+              }
             />
           </Button>
         </div>
+
         <div className="absolute right-28 bottom-2">
           <Button
             size="icon"

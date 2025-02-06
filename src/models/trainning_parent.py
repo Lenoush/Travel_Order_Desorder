@@ -55,11 +55,11 @@ class Trainner:
         current_date = datetime.now().strftime("%Y%m%d_%H%M%S")
         if self.model_size == "vierge":
             output_path = (
-            Output_model + f"model_spacy_vierge/{self.model_size}_train_losses_{current_date}.png"
+            Output_model + f"/{self.model_size}_train_losses_{current_date}_blank.png"
             )
         else:
             output_path = (
-            Output_model + f"model_spacy/{self.model_size}_train_losses.png"
+            Output_model + f"/{self.model_size}_train_losses_{current_date}_trained.png"
             )
         plt.savefig(output_path)
         plt.close()

@@ -15,9 +15,9 @@ class Evaluators:
             "none_small": spacy.load("fr_core_news_sm"),
             "none_medium": spacy.load("fr_core_news_md"),
             "none_large": spacy.load("fr_core_news_lg"),
-            "small": spacy.load(Output_model + "model_spacy/small_trained.model"),
-            "medium": spacy.load(Output_model + "model_spacy/medium_trained.model"),
-            "large": spacy.load(Output_model + "model_spacy/large_trained.model"),
+            "small": spacy.load(Output_model + "/small_trained.model"),
+            "medium": spacy.load(Output_model + "/medium_trained.model"),
+            "large": spacy.load(Output_model + "/large_trained.model"),
         }
         if model_size not in model_map:
             raise ValueError("Model size must be something specific.")

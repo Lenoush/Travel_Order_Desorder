@@ -6,7 +6,7 @@ import spacy
 
 from src.data_process.utils import simple_cleaning, check_label, detected_language
 from src.voice_process.hear_voice import process_m4a_file
-from config import model_used_path
+from config import model_used_path, UPLOAD_FOLDER
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origin": "*"}})
@@ -54,29 +54,18 @@ def process_route():
 
     return jsonify({"text": text, "responsesmodel": responses})
 
-
-
-# Configurer le répertoire pour stocker temporairement les fichiers
-app.config['UPLOAD_FOLDER'] = './uploads'
-app.config['ALLOWED_EXTENSIONS'] = {'m4a'}
-
-# Vérifier les extensions autorisées
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
 @app.route('/api/convert_audio', methods=['POST'])
 def convert_audio():
 
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "Aucun fichier sélectionné."}), 400
-    
-    if file and allowed_file(file.filename):
+
+    if file :
         filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
-        # Traiter le fichier m4a
         transcribed_text = process_m4a_file(filepath)
 
         if transcribed_text:

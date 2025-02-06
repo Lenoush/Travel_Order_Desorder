@@ -148,7 +148,7 @@ if __name__ == "__main__":
             train = trainer.load_data(train_file=Train_train)
 
             date_today = datetime.today().strftime("%Y-%m-%d")
-            output_dir = Output_model + f"model_spacy/{model_size}_trained.model"
+            output_dir = Output_model + f"/{model_size}_trained.model"
 
             trained_model = trainer.train_spacy(train, iterations=100)
             trainer.save_model(model_to_save=trained_model, output_dir=output_dir)
