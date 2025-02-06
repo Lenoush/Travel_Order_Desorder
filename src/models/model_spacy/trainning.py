@@ -28,7 +28,6 @@ class SpacyNERTrainer(Trainner):
             "small": "fr_core_news_sm",
             "medium": "fr_core_news_md",
             "large": "fr_core_news_lg",
-            "testmo": "fr_core_news_lg",
         }
 
         self.model_size: str = model_size
@@ -37,14 +36,6 @@ class SpacyNERTrainer(Trainner):
         self.ner = self.nlp.get_pipe("ner")
 
     def load_data(self, train_file: str) -> List[Tuple[str, dict]]:
-        """
-        Loads the training data from CSV files.
-
-        Parameters:
-        -----------
-        train_file : str
-            Path to the training data CSV file.
-        """
         df_train: pd.DataFrame = pd.read_csv(train_file)
 
         X_train: List[str] = df_train["Phrase"].to_list()
@@ -52,11 +43,19 @@ class SpacyNERTrainer(Trainner):
 
         for phrase, response in zip(X_train, y_train):
             entities: List[Tuple[int, int, str]] = []
+            seen_spans = set()
+
             for ent in response.split(":"):
                 start_char = phrase.find(ent)
                 end_char = start_char + len(ent)
+
                 if start_char != -1:
+                    # Check for overlaps
+                    if any(s < end_char and start_char < e for s, e in seen_spans):
+                        continue  # Skip overlapping entities
                     entities.append((start_char, end_char, "LOC"))
+                    seen_spans.add((start_char, end_char))
+
             self.train_data.append((phrase, {"entities": entities}))
 
         return self.train_data
@@ -149,7 +148,7 @@ if __name__ == "__main__":
             train = trainer.load_data(train_file=Train_train)
 
             date_today = datetime.today().strftime("%Y-%m-%d")
-            output_dir = Output_model + f"model_spacy/{date_today}_vierge_trained.model"
+            output_dir = Output_model + f"/{model_size}_trained.model"
 
             trained_model = trainer.train_spacy(train, iterations=100)
             trainer.save_model(model_to_save=trained_model, output_dir=output_dir)

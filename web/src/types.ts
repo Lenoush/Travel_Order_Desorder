@@ -2,6 +2,7 @@
 
 // Interface pour une réponse de route
 export interface RouteResponse {
+    IDsentence: number;
     responsesmodel: RouteItem[] | string[];
     text: string;
 }

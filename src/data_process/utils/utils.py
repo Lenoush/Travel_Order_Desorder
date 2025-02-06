@@ -126,12 +126,6 @@ def simple_cleaning(phrase: str) -> str:
     if " d'" in cleaned_phrase:
         cleaned_phrase = cleaned_phrase.replace(" d'", " de ")
 
-    # Add point a la fin de chaque phrase
-    cleaned_phrase = cleaned_phrase + "."
-
-    # Lemmatize the phrase
-    
-
     return cleaned_phrase
 
 def check_label(predict):
@@ -151,13 +145,13 @@ def check_label(predict):
             count_correspondance += 1
 
     if count_depart == 0 and count_arrival == 0:
-        erreur.append("No departure city and arrival city found")
+        erreur.append("NOT_TRIP")
         return predict, erreur
 
     if count_depart == 0 :
-        erreur.append("No departure city found")
+        erreur.append("NOT_TRIP : No departure")
     if count_arrival == 0 :
-        erreur.append("No arrival city found")
+        erreur.append("NOT_TRIP : No arrival ")
 
     return predict, erreur
 
@@ -165,9 +159,14 @@ def detected_language(text: str) -> bool:
     """
     Vérifie si le texte est en français, en combinant détection automatique et mots-clés.
     """
+    words_in_text = set(re.findall(r'\b\w+\b', text.lower()))
+
     common_french_words = {"le", "la", "je", "tu", "vous", "et", "à", "de"}
-    if any(word in text.lower() for word in common_french_words):
+    common_english_words = {"the", "and", "you", "to", "of", "it", "is"}
+    if common_french_words & words_in_text:
         return True
+    if common_english_words & words_in_text:
+        return False
 
     # Détection automatique
     detected_language, _ = langid.classify(text)

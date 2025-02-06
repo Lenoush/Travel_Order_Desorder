@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { Mic, MicOff, Loader2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
@@ -116,22 +116,52 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
   // Envoi du texte de la route à l'API
   const handleSubmit = async () => {
     if (!routeText.trim()) return;
-    const API_URL = import.meta.env.VITE_API_URL;
+
+    let headers = new Headers();
+
+    const body = JSON.stringify({ text: routeText });
+    const API_URL = import.meta.env.VITE_API_URL_MODEL;
 
     try {
       setIsProcessing(true);
-      const response = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({ text: routeText }),
-      });
-      if (!response.ok) {
-        throw new Error('Erreur lors de la requête');
+
+      headers.append('Content-Type', 'application/json');
+      headers.append('Accept', 'application/json');
+
+      const { text } = JSON.parse(body);
+      const lines = text.split("\n");
+      const filteredLines = lines.filter(line => line.trim() !== '');
+      const responses: RouteResponse[] = [];
+
+      for (let i = 0; i < filteredLines.length; i++) {
+        let ID = 0;
+        let text = filteredLines[i];
+
+        if (text.includes(",") && /^\d/.test(text)) {
+          [ID, text] = text.split(",", 2);
+        }
+
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ text }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch');
+        }
+
+        const one_responses = await response.json();
+        const responseWithID: RouteResponse = {
+          IDsentence: ID,
+          responsesmodel: one_responses.responsesmodel,
+          text: one_responses.text,
+        };
+
+        responses.push(responseWithID);
       }
-      const responses = await response.json();
+
+      console.log(responses);
       setResponses(responses);
       setHasInteracted(true);
     } catch (error) {
@@ -180,79 +210,150 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
   };
 
   return (
-      <div className="space-y-4 w-full max-w-2xl mx-auto">
-        {/* Zone de saisie du texte */}
-        <div className="relative">
-          <Textarea
-              value={routeText}
-              onChange={(e) => setRouteText(e.target.value)}
-              placeholder="Entrez votre route (ex : 'New York à Los Angeles via Chicago')"
-              className="min-h-[120px] pr-12 text-lg"
-          />
-          {/* Bouton pour démarrer/arrêter l'enregistrement */}
-          <div className="absolute right-2 bottom-2">
-            <Button
-                size="icon"
-                variant={isRecording ? "destructive" : "secondary"}
-                onClick={isRecording ? stopRecording : startRecording}
-                className="rounded-full"
-                disabled={isProcessing}
-            >
-              {isProcessing ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-              ) : isRecording ? (
-                  <MicOff className="h-5 w-5" />
-              ) : (
-                  <Mic className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
-        </div>
+    <div className="space-y-4 w-full max-w-2xl mx-auto flex-col">
+      <Textarea
+        value={routeText}
+        onChange={(e) => setRouteText(e.target.value)}
+        placeholder="Enter your route (e.g., 'New York to Los Angeles via Chicago')"
+        className="min-h-[120px] pr-12 text-lg"
+      />
 
-        {/* Visualisation de l'audio pendant l'enregistrement */}
-        {isRecording && (
-            <div className="h-16 bg-gray-50 rounded-lg p-2 flex items-center justify-center gap-1 overflow-hidden">
-              {audioData.map((value, index) => (
-                  <div
-                      key={index}
-                      className="w-2 bg-primary rounded-full transition-all duration-75"
-                      style={{
-                        height: `${Math.max(value * 100, 15)}%`,
-                        transform: `scaleY(${Math.max(value, 0.15)})`
-                      }}
-                  />
-              ))}
-            </div>
-        )}
 
-        {/* Bouton d'envoi du texte */}
+
+      <div className='flex flex-row gap-4 justify-end'>
         <Button
-            onClick={handleSubmit}
-            className="w-full"
-            disabled={!routeText.trim() || isProcessing}
+          size="icon"
+          variant={isRecording ? "destructive" : "secondary"}
+          onClick={isRecording ? stopRecording : startRecording}
+          className="rounded-full"
+          disabled={isProcessing}
         >
-          Show Route
+          {isProcessing ? (
+            <Loader2 className="h-5 w-5 animate-spin" />
+          ) : isRecording ? (
+            <MicOff className="h-5 w-5" />
+          ) : (
+            <Mic className="h-5 w-5" />
+          )}
         </Button>
 
-        {/* Si un enregistrement audio existe, on affiche un lecteur et des boutons pour télécharger et envoyer */}
-        {recordedAudio && (
-            <div className="space-y-4">
-              <audio
-                  controls
-                  src={URL.createObjectURL(recordedAudio)}
-                  className="w-full"
-              />
-              <div className="flex gap-2">
-                <Button onClick={handleDownloadAudio} variant="outline">
-                  Télécharger l'audio
-                </Button>
-                <Button onClick={handleUploadAudio} variant="secondary">
-                  Envoyer l'audio
-                </Button>
-              </div>
-            </div>
-        )}
+        <Button
+          size="icon"
+          variant="secondary"
+          onClick={() => document.getElementById('fileInput')?.click()}
+          className="rounded-full"
+          disabled={isProcessing}
+          title="Télécharger un fichier txt ou m4a"
+        >
+          <Upload className="w-5 h-5" />
+          <input
+            type="file"
+            id="fileInput"
+            accept=".txt, .m4a"
+            style={{ display: 'none' }}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                if (!file.name.endsWith(".txt") && !file.name.endsWith(".m4a")) {
+                  alert("Erreur : Seuls les fichiers .txt ou .m4a sont autorisés !");
+                  return;
+                }
+
+                if (file.name.endsWith(".txt")) {
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    if (event.target?.result) {
+                      setRouteText(event.target.result as string);
+                    }
+                  };
+                  reader.readAsText(file);
+                  return;
+                }
+
+                if (file.name.endsWith(".m4a")) {
+                  const API_URL = import.meta.env.VITE_API_URL_VOICE;
+                  const formData = new FormData();
+                  formData.append('file', file, file.name);
+
+                  try {
+                    const response = await fetch(API_URL, {
+                      method: 'POST',
+                      body: formData,
+                    });
+                    if (response.ok) {
+                      const data = await response.json();
+                      setRouteText(data.transcribedText);
+                    } else {
+                      toast.error('Erreur lors de la transcription');
+                    }
+                  }
+                  catch (error) {
+                    console.error(error);
+                    toast.error("Une erreur est survenue lors de l'envoi du fichier.");
+                  }
+                }
+              }
+            }
+            }
+          />
+        </Button>
+
+        <Button
+          size="icon"
+          variant="secondary"
+          onClick={() => setRouteText('')}
+          className="rounded-full"
+          disabled={isProcessing || !routeText}
+          title="Effacer le texte du trajet"
+        >
+          <X className="w-5 h-5" />
+        </Button>
       </div>
+
+      <Button
+        onClick={handleSubmit}
+        className="w-full"
+        disabled={!routeText.trim() || isProcessing}
+      >
+        Show Route
+      </Button>
+
+      {
+        recordedAudio && (
+          <div className="space-y-4">
+            <audio
+              controls
+              src={URL.createObjectURL(recordedAudio)}
+              className="w-full"
+            />
+            <div className="flex gap-2">
+              <Button onClick={handleDownloadAudio} variant="outline">
+                Télécharger l'audio
+              </Button>
+              <Button onClick={handleUploadAudio} variant="secondary">
+                Envoyer l'audio
+              </Button>
+            </div>
+          </div>
+        )
+      }
+
+      {isRecording && (
+        <div className="h-16 bg-gray-50 rounded-lg p-2 flex items-center justify-center gap-1 overflow-hidden">
+          {audioData.map((value, index) => (
+            <div
+              key={index}
+              className="w-2 bg-primary rounded-full transition-all duration-75"
+              style={{
+                height: `${Math.max(value * 100, 15)}%`,
+                transform: `scaleY(${Math.max(value, 0.15)})`
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+    </div >
   );
 };
 
