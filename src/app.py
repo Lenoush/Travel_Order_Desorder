@@ -23,7 +23,7 @@ def process_route():
     if not text: # ARROR CASE IF NOT TEXT : SHOULD NOT CLICK ON BUTTON IF SO USEFUL ? 
         return jsonify({"error": "No text provided"}), 400
 
-    # Deectect langage of the text
+    # Detect langage of the text
     is_french = detected_language(text)
     if  is_french : 
         # Clean the text

@@ -96,7 +96,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
   };
 
   // Arrêt de l'enregistrement et nettoyage des ressources
-  const stopRecording = () => {
+  const stopRecording = async () => {
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
@@ -110,6 +110,32 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
+    }
+
+    if (recordedAudio) {
+        const API_URL = import.meta.env.VITE_API_URL_VOICE;
+        const formData = new FormData();
+        formData.append('file', recordedAudio, 'audio.webm');
+
+        try {
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            body: formData,
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setRouteText(data.transcribedText);
+          } else {
+            toast.error('Erreur lors de la transcription');
+          }
+        }
+        catch (error) {
+          console.error(error);
+          toast.error("Une erreur est survenue lors de l'envoi au backend.");
+        }
+    }
+    else {
+      toast.error("Aucun fichier audio enregistré");
     }
   };
 
@@ -172,42 +198,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
     }
   };
 
-  // Téléchargement de l'audio enregistré
-  const handleDownloadAudio = useCallback(() => {
-    if (!recordedAudio) return;
-    const url = URL.createObjectURL(recordedAudio);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = 'recording.webm';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  }, [recordedAudio]);
-
-  // Envoi de l'audio à une API via un formulaire multipart/form-data
-  const handleUploadAudio = async () => {
-    if (!recordedAudio) return;
-    const formData = new FormData();
-    formData.append('audio', recordedAudio, 'recording.webm');
-    const API_VOICE_URL = import.meta.env.VITE_API_VOICE_URL || import.meta.env.VITE_API_URL;
-    try {
-      const response = await fetch(API_VOICE_URL, {
-        method: 'POST',
-        body: formData,
-      });
-      if (!response.ok) {
-        throw new Error("Erreur lors de l'envoi de l'audio");
-      }
-      const data = await response.json();
-      console.log("Réponse de l'API audio:", data);
-      toast.success("Audio envoyé avec succès !");
-    } catch (error) {
-      console.error("Échec de l'envoi:", error);
-      toast.error("Échec de l'envoi de l'audio");
-    }
-  };
 
   return (
     <div className="space-y-4 w-full max-w-2xl mx-auto flex-col">
@@ -217,8 +207,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
         placeholder="Enter your route (e.g., 'New York to Los Angeles via Chicago')"
         className="min-h-[120px] pr-12 text-lg"
       />
-
-
 
       <div className='flex flex-row gap-4 justify-end'>
         <Button
@@ -317,41 +305,6 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
       >
         Show Route
       </Button>
-
-      {
-        recordedAudio && (
-          <div className="space-y-4">
-            <audio
-              controls
-              src={URL.createObjectURL(recordedAudio)}
-              className="w-full"
-            />
-            <div className="flex gap-2">
-              <Button onClick={handleDownloadAudio} variant="outline">
-                Télécharger l'audio
-              </Button>
-              <Button onClick={handleUploadAudio} variant="secondary">
-                Envoyer l'audio
-              </Button>
-            </div>
-          </div>
-        )
-      }
-
-      {isRecording && (
-        <div className="h-16 bg-gray-50 rounded-lg p-2 flex items-center justify-center gap-1 overflow-hidden">
-          {audioData.map((value, index) => (
-            <div
-              key={index}
-              className="w-2 bg-primary rounded-full transition-all duration-75"
-              style={{
-                height: `${Math.max(value * 100, 15)}%`,
-                transform: `scaleY(${Math.max(value, 0.15)})`
-              }}
-            />
-          ))}
-        </div>
-      )}
 
     </div >
   );
