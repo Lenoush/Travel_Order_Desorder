@@ -11,29 +11,7 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
   const containerRef = useRef<HTMLDivElement>(null);
   const [showFormatted, setShowFormatted] = useState(false);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      const cityElements = containerRef.current.querySelectorAll('.city-container');
-      cityElements.forEach((city, index) => {
-        if (index < cityElements.length - 1) {
-          const currentCity = city.getBoundingClientRect();
-          const nextCity = cityElements[index + 1].getBoundingClientRect();
-          const line = document.createElement('div');
-          line.className = 'route-line';
-          line.style.height = `${nextCity.top - currentCity.top}px`;
-          line.style.left = `${currentCity.left + currentCity.width / 2}px`;
-          line.style.top = `${currentCity.top + currentCity.height / 2}px`;
-          containerRef.current?.appendChild(line);
-        }
-      });
-    }
-
-    return () => {
-      const lines = document.querySelectorAll('.route-line');
-      lines.forEach((line) => line.remove());
-    };
-  }, [responses]);
-
+  
   const formattedResponses = responses.map((response) => {
     const isModelValid =
       Array.isArray(response.responsesmodel) &&
@@ -43,7 +21,7 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
       'word' in (response.responsesmodel[0] as RouteItem);
 
     if (!isModelValid) {
-      return `${response.IDsentence}, ${response.responsesmodel}`;
+      return `${response.IDsentence},${response.responsesmodel}`;
     }
 
     const routeModel = (response.responsesmodel as RouteItem[]).sort((a, b) => {
@@ -95,6 +73,8 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
             ? (response.responsesmodel as string[]) || ['Should not be shown']
             : [];
 
+          const isCorrespondance = (city: RouteItem) => city.label === 'CORRESPONDANCE';
+
           return (
             <div key={responseIndex} className="space-y-8">
               <h2 className="text-xl font-bold">{responseIndex + 1} : ID Sentence {response.IDsentence}</h2>
@@ -109,12 +89,7 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
                     transition={{ delay: cityIndex * 0.1 }}
                   >
                     <div
-                      className={`city-dot ${cityIndex === 0
-                          ? 'start'
-                          : cityIndex === routeModel.length - 1
-                            ? 'end'
-                            : ''
-                        }`}
+                      className={`${isCorrespondance(city) ? 'city-dot-correspondance' : 'city-dot-startOrEnd'}`}
                     />
                     <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-lg flex-1">
                       <h3 className="text-lg font-semibold">{city.word}</h3>

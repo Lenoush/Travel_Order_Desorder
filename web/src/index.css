@@ -31,6 +31,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -41,14 +42,13 @@
   transform-origin: top;
 }
 
-.city-dot {
+.city-dot-startOrEnd {
+  @apply w-4 h-4 rounded-full bg-green-500 transition-all duration-300;
+  @apply ring-4 ring-green-500/20;
+
+}
+
+.city-dot-correspondance {
   @apply w-4 h-4 rounded-full bg-primary transition-all duration-300;
-}
-
-.city-dot.start {
-  @apply ring-4 ring-primary/20;
-}
-
-.city-dot.end {
   @apply ring-4 ring-primary/20;
 }
