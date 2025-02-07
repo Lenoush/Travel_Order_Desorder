@@ -70,12 +70,12 @@ def evaluate_model(nlp, validation_data: List[Tuple[str, dict]]) -> None:
     return accuracy
 
 
-# import spacy
-# from config import model_used_path, Test_vierge, Valid_vierge
+import spacy
+from config import model_used_path, Test_vierge, Valid_vierge
 
-# nlp = spacy.load(model_used_path)
-# data_test = load_data(Test_vierge)
-# data_valid = load_data(Valid_vierge)
-# acc_test = evaluate_model(nlp, data_test)
-# acc_valid = evaluate_model(nlp, data_valid)
-# print(acc_test, acc_valid)
+nlp = spacy.load(model_used_path)
+data_test = load_data(Test_vierge)
+data_valid = load_data("/Users/lenaoudjman/Desktop/T-AIA-901-PAR_22/data/dataset_mo_Lena.csv")
+acc_test = evaluate_model(nlp, data_test)
+acc_valid = evaluate_model(nlp, data_valid)
+print(acc_test, acc_valid)
