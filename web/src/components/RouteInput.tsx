@@ -182,6 +182,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
           IDsentence: ID,
           responsesmodel: one_responses.responsesmodel,
           text: one_responses.text,
+          itinerary: one_responses.itinerary,
         };
 
         responses.push(responseWithID);
