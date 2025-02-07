@@ -27,16 +27,10 @@ model_used_path = "path_model_you_want_to_use.model"
 UPLOAD_FOLDER = ""
 ```
 
-
-Se créer un fichier web/.env avec : 
-````
-VITE_API_URL=http://IP:PORT/api/route
-````
-
 ## How to use 
 Pour obtenir le dataset complet , SNCF , et les splits dataset :
 ````
-python src/data_process/build_dataset.py
+python src/data_process/build_dataset.py <vierge or train>
 ````
 
 Pour entrainer le model :

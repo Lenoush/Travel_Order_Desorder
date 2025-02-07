@@ -112,7 +112,9 @@ Phrases correctes = Phrases dont le models a detecté exatcement les bonnes vill
 | **Large trained without rule**    | 59.02%                |
 | **Large trained with rule**       | 65.15%                |
 |------------------------------------|-----------------------|
-| **Blank**                         | 90.62%                |
+| **Blank**                         | 89.62%                |
+| **Blank sur Mojgan dataset**        | 11.085%                |
+| **Blank train with Mojgan dataset**  | 95.158%                |
 
 ### Error
 - Elles ne sont pas traités par le model mais post model pour le front

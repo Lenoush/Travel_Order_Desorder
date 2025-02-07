@@ -151,6 +151,14 @@ class BuildDataset:
         save_to_csv(self.X_train, self.y_train, self.train_file)
         save_to_csv(self.X_val, self.y_val, self.val_file)
         save_to_csv(self.X_test, self.y_test, self.test_file)
+    
+    def load_additional_data(self, additional_csv: str) -> Tuple[List[str], List[str]]:
+        """
+        Loads an additional CSV file containing phrases and responses.
+        """
+        additional_df = pd.read_csv(additional_csv)
+        return additional_df["Phrase"].tolist(), additional_df["Reponse"].tolist()
+
 
 
 if __name__ == "__main__":
@@ -180,6 +188,14 @@ if __name__ == "__main__":
     dataset.build()
     print("Loading and splitting data")
     phrases, responses = load_data(dataset.dataset_path)
+
+    print("Loading additional data")
+    additional_phrases, additional_responses = dataset.load_additional_data(
+        "/Users/lenaoudjman/Desktop/T-AIA-901-PAR_22/data/dataset_mo_Lena.csv"
+    )
+    phrases.extend(additional_phrases)
+    responses.extend(additional_responses)
+
     dataset.split_data(phrases, responses)
     print("Building unique dataset")
     dataset.build_unique()
