@@ -11,7 +11,6 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
   const containerRef = useRef<HTMLDivElement>(null);
   const [showFormatted, setShowFormatted] = useState(false);
 
-
   const formattedResponses = responses.map((response) => {
     const isModelValid =
       Array.isArray(response.responsesmodel) &&
@@ -69,9 +68,6 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
             })
             : [];
 
-          // const itinerary = response.itinerary || [];
-          // const travelTime = response.itinerary["Duree_totale"] || "Unknown Duration";
-
           const errorMessages = !isModelValid
             ? (response.responsesmodel as string[]) || ['Should not be shown']
             : [];
@@ -82,45 +78,52 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
             <div key={responseIndex} className="space-y-8">
               <h2 className="text-xl font-bold">{responseIndex + 1} : ID Sentence {response.IDsentence}</h2>
               <p>"{response.text}"</p>
+              <p className="text-gray-600">⏳ Temps total: {response.itinerary?.[0]?.Duree_totale || 'Inconnu'}</p>
+              <div className="text-gray-600">
+                {response.itinerary?.length > 0 ? (
+                  response.itinerary.map((it, index) => (
+                    <p key={index}>📍 <strong>Itinéraire {index + 1}:</strong> {it.Itineraire || 'Inconnu'} </p>
+                  ))
+                ) : (
+                  <p>📍 Itinéraire: Inconnu</p>
+                )}
+              </div>
               {isModelValid ? (
-                routeModel.map((city, cityIndex) => (
+                routeModel.map((city, cityIndex) => {
+
+                  return (
                     <motion.div
-                        key={cityIndex}
-                        className="city-container flex items-center gap-4"
-                        initial={{opacity: 0, x: -20}}
-                        animate={{opacity: 1, x: 0}}
-                        transition={{delay: cityIndex * 0.1}}
+                      key={cityIndex}
+                      className="city-container flex items-center gap-4"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: cityIndex * 0.1 }}
                     >
-                      <div
-                          className={`${isCorrespondance(city) ? 'city-dot-correspondance' : 'city-dot-startOrEnd'}`}
-                      />
+                      <div className={`${isCorrespondance(city) ? 'city-dot-correspondance' : 'city-dot-startOrEnd'}`} />
                       <div className="bg-white/50 backdrop-blur-sm rounded-lg p-4 shadow-lg flex-1">
                         <h3 className="text-lg font-semibold">{city.word}</h3>
-                        {city.label === 'DEPART' && (
-                            <p className="text-sm text-muted-foreground">Starting Point</p>
-                        )}
+                        {city.label === 'DEPART' && <p className="text-sm text-muted-foreground">🚉 Départ</p>}
                         {city.label === 'CORRESPONDANCE' && (
-                            <p className="text-sm text-muted-foreground">Via</p>
+                          <p className="text-sm text-muted-foreground">🔄 Correspondance</p>
                         )}
-                        {city.label === 'ARRIVEE' && (
-                            <p className="text-sm text-muted-foreground">Destination</p>
-                        )}
+                        {city.label === 'ARRIVEE' && <p className="text-sm text-muted-foreground">🏁 Arrivée</p>}
                       </div>
                     </motion.div>
-                ))
+                  );
+                })
               ) : hasInteracted ? (
-                  <div className="bg-red-100 p-4 rounded-lg shadow-md">
-                    <h3 className="text-lg font-semibold text-red-600">Errors Detected</h3>
-                    <ul className="list-disc pl-5 space-y-2">
-                      {errorMessages.map((error, errorIndex) => (
-                          <li key={errorIndex} className="text-red-500">
-                            {error}
-                          </li>
-                      ))}
-                    </ul>
-                  </div>
+                <div className="bg-red-100 p-4 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold text-red-600">Errors Detected</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    {errorMessages.map((error, errorIndex) => (
+                      <li key={errorIndex} className="text-red-500">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : (
-                  <div></div>
+                <div></div>
               )}
             </div>
           );
