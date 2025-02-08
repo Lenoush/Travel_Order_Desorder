@@ -13,31 +13,27 @@ from config import model_used_path, UPLOAD_FOLDER, DIJKSTRA_Route
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origin": "*"}})
 
-
 nlp = spacy.load(model_used_path)
+
 
 print("Loading data and building graph...")
 stops, stop_times, trips, routes, calendar_dates, commune_stations = load_and_merge_data()
-# G_all = build_graph(stops, stop_times, trips, routes)
-graph_filename = DIJKSTRA_Route
-# print("file list in graph_filename", os.listdir("./../"))
-if os.path.exists(graph_filename):
+if os.path.exists(DIJKSTRA_Route):
     print("Loading graph from file...")
-    G_all = load_graph(graph_filename)
+    graphique_dijkstra = load_graph(DIJKSTRA_Route)
 else:
     print("Building graph...")
-    G_all = build_graph(stops, stop_times, trips, routes)
-    save_graph(G_all, graph_filename)
-print("Data loaded and graph built.")
+    graphique_dijkstra = build_graph(stops, stop_times, trips, routes)
+    save_graph(graphique_dijkstra, DIJKSTRA_Route)
 
 @app.route('/api/route', methods=['POST'])
 def process_route():
     data = request.json
     text = data.get('text', '')
     responses = []
-
-    if not text: # ARROR CASE IF NOT TEXT : SHOULD NOT CLICK ON BUTTON IF SO USEFUL ? 
-        return jsonify({"error": "No text provided"}), 400
+    error_nlp = []
+    itinerary = []
+    error_route = []
 
     # Detect langage of the text
     is_french = detected_language(text)
@@ -54,13 +50,14 @@ def process_route():
         ]
 
         # Check label of entities
-        predicted_entities, error = check_label(predicted_entities)
+        predicted_entities, error_nlp = check_label(predicted_entities)
     else:
-        error = ["NOT_FRENCH"]
+        error_nlp.append("NOT_FRENCH")
 
-    cities_for_route = {"DEPART": None, "ARRIVER": None, "CORRESPONDANCE": []}
-    if not error:
-        # Format the responses
+    # Get the cities from NLP model
+    cities_for_route = {"DEPART": None, "ARRIVEE": None, "CORRESPONDANCE": []}
+    if not error_nlp:
+        # Formate the responses
         for cities in predicted_entities:
             label = cities["label"]
             word = text_cleaned[cities["start"]:cities["end"]][0].upper() + text_cleaned[cities["start"]:cities["end"]][1:]
@@ -71,31 +68,32 @@ def process_route():
             if label == "DEPART":
                 cities_for_route["DEPART"] = word
             elif label == "ARRIVEE":
-                cities_for_route["ARRIVER"] = word
+                cities_for_route["ARRIVEE"] = word
             elif label == "CORRESPONDANCE":
                 cities_for_route["CORRESPONDANCE"].append(word)
-    else:
-        responses = error
 
-    itinerary = []
-    if not cities_for_route["CORRESPONDANCE"]:
-        # Trajet direct si aucune correspondance
-        if cities_for_route["DEPART"] and cities_for_route["ARRIVER"]:
-            route_part = get_fastest_route_for_city(G_all, commune_stations, cities_for_route["DEPART"], cities_for_route["ARRIVER"])
+        # Get the fastest route
+        if not cities_for_route["CORRESPONDANCE"]:
+            # Without correspondance
+            if cities_for_route["DEPART"] and cities_for_route["ARRIVEE"]:
+                route_part, error_route = get_fastest_route_for_city(graphique_dijkstra, commune_stations, cities_for_route["DEPART"], cities_for_route["ARRIVEE"])
+                itinerary.append(route_part)
+        else:
+            # With correspondance
+            prev_stop = cities_for_route["DEPART"]
+            for correspondance in cities_for_route["CORRESPONDANCE"]:
+                route_part, error_ = get_fastest_route_for_city(graphique_dijkstra, commune_stations, prev_stop, correspondance)
+                prev_stop = correspondance
+                itinerary.append(route_part)
+                error_route.append(error_)
+
+            route_part, error_ = get_fastest_route_for_city(graphique_dijkstra, commune_stations, prev_stop, cities_for_route["ARRIVEE"])
             itinerary.append(route_part)
-    else:
-        # Construire l'itinéraire avec correspondances
-        prev_stop = cities_for_route["DEPART"]
-        for correspondance in cities_for_route["CORRESPONDANCE"]:
-            route_part = get_fastest_route_for_city(G_all, commune_stations, prev_stop, correspondance)
-            itinerary.append(route_part)
-            prev_stop = correspondance
+            error_route.append(error_)
 
-        # Dernière étape : de la dernière correspondance à l'arrivée
-        route_part = get_fastest_route_for_city(G_all, commune_stations, prev_stop, cities_for_route["ARRIVER"])
-        itinerary.append(route_part)
+        print("Itinerary: ", itinerary)
 
-    return jsonify({"text": text, "responsesmodel": responses, "itinerary": itinerary})
+    return jsonify({"text": text, "responsesmodel": responses, "itinerary": itinerary, "error_nlp": error_nlp, "error_route": error_route})
 
 @app.route('/api/convert_audio', methods=['POST'])
 def convert_audio():

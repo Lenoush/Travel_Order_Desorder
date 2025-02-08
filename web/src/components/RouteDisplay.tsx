@@ -12,18 +12,14 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
   const [showFormatted, setShowFormatted] = useState(false);
 
   const formattedResponses = responses.map((response) => {
-    const isModelValid =
-      Array.isArray(response.responsesmodel) &&
-      response.responsesmodel.length > 0 &&
-      typeof response.responsesmodel[0] === 'object' &&
-      'label' in (response.responsesmodel[0] as RouteItem) &&
-      'word' in (response.responsesmodel[0] as RouteItem);
+
+    const isModelValid = response.error_nlp === null;
 
     if (!isModelValid) {
       return `${response.IDsentence},${response.responsesmodel}`;
     }
 
-    const routeModel = (response.responsesmodel as RouteItem[]).sort((a, b) => {
+    const routeModel = (response.responsesmodel).sort((a, b) => {
       const order = { DEPART: 1, CORRESPONDANCE: 2, ARRIVEE: 3 };
       return (order[a.label] || 0) - (order[b.label] || 0);
     });
@@ -54,12 +50,8 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
       </div>
       {responses.length > 0 ? (
         responses.map((response, responseIndex) => {
-          const isModelValid =
-            Array.isArray(response.responsesmodel) &&
-            response.responsesmodel.length > 0 &&
-            typeof response.responsesmodel[0] === 'object' &&
-            'label' in (response.responsesmodel[0] as RouteItem) &&
-            'word' in (response.responsesmodel[0] as RouteItem);
+          const isModelValid = response.error_nlp.length === 0;
+          const isWayValid = Array.isArray(response.error_route) && response.error_route.every(err => err === null);
 
           const routeModel = isModelValid
             ? (response.responsesmodel as RouteItem[]).sort((a, b) => {
@@ -68,8 +60,8 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
             })
             : [];
 
-          const errorMessages = !isModelValid
-            ? (response.responsesmodel as string[]) || ['Should not be shown']
+          const errorMessages = !isModelValid || !isWayValid
+            ? (response.error_nlp || []).concat(response.error_route || [])
             : [];
 
           const isCorrespondance = (city: RouteItem) => city.label === 'CORRESPONDANCE';
@@ -78,16 +70,35 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
             <div key={responseIndex} className="space-y-8">
               <h2 className="text-xl font-bold">{responseIndex + 1} : ID Sentence {response.IDsentence}</h2>
               <p>"{response.text}"</p>
-              <p className="text-gray-600">⏳ Temps total: {response.itinerary?.[0]?.Duree_totale || 'Inconnu'}</p>
-              <div className="text-gray-600">
-                {response.itinerary?.length > 0 ? (
-                  response.itinerary.map((it, index) => (
-                    <p key={index}>📍 <strong>Itinéraire {index + 1}:</strong> {it.Itineraire || 'Inconnu'} </p>
-                  ))
-                ) : (
-                  <p>📍 Itinéraire: Inconnu</p>
-                )}
-              </div>
+
+              {isWayValid && isModelValid ? (
+                <>
+                  <p className="text-gray-600">⏳ Temps total: {response.itinerary?.[0]?.Duree_totale || 'Inconnu'}</p>
+                  <div className="text-gray-600">
+                    {response.itinerary?.length > 0 ? (
+                      response.itinerary.map((it, index) => (
+                        <p key={index}>📍 <strong>Itinéraire {index + 1}:</strong> {it.Itineraire} </p>
+                      ))
+                    ) : (
+                      <p>📍 <strong>Itinéraire:</strong> {response.error_route}</p>
+                    )}
+                  </div>
+                </>
+              ) : isWayValid && !isModelValid ?(
+                <div></div>
+              ) : (
+                <div className="bg-red-100 p-4 rounded-lg shadow-md">
+                  <h3 className="text-lg font-semibold text-red-600">Errors Detected</h3>
+                  <ul className="list-disc pl-5 space-y-2">
+                    {errorMessages.map((error, errorIndex) => (
+                      <li key={errorIndex} className="text-red-500">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {isModelValid ? (
                 routeModel.map((city, cityIndex) => {
 

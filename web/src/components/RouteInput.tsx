@@ -170,7 +170,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
         const response = await fetch(API_URL, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({text}),
         });
 
         if (!response.ok) {
@@ -183,6 +183,8 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
           responsesmodel: one_responses.responsesmodel,
           text: one_responses.text,
           itinerary: one_responses.itinerary,
+          error_nlp: one_responses.error_nlp,
+          error_route: one_responses.error_route,
         };
 
         responses.push(responseWithID);
@@ -192,7 +194,7 @@ const RouteInput: React.FC<RouteInputProps> = ({ setResponses, setHasInteracted 
       setResponses(responses);
       setHasInteracted(true);
     } catch (error) {
-      console.error('Erreur:', error);
+      console.error(error);
       toast.error("Erreur lors de l'envoi de la route");
     } finally {
       setIsProcessing(false);
