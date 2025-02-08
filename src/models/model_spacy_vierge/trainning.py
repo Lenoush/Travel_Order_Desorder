@@ -139,7 +139,7 @@ if __name__ == "__main__":
     valid = trainer.load_data(train_file=Valid_vierge, train=False)
     trainer.load_data(train_file=Train_vierge)
 
-    date_today = datetime.today().strftime("%Y-%m-%d")
+    date_today = datetime.today().strftime("%Y-%m-%d-%H-%M-%S")
     output_dir = Output_model + f"/{date_today}_trained.model"
 
     optimizer = trainer.nlp.begin_training()

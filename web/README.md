@@ -14,7 +14,7 @@ Ce projet est une application web permettant de rechercher des trajets de train,
 
 ## 📂 Structure du projet
 
-```
+````
 web/
 ├── src/                   # Dossier source du projet
 │   ├── components/        # Composants React
@@ -35,7 +35,14 @@ web/
 ├── eslint.config.js       # Configuration ESLint
 ├── postcss.config.js      # Configuration PostCSS
 ├── README.md              # Documentation du projet
-```
+````
+
+
+## Creer fichier .env
+````
+VITE_API_URL_MODEL=http://IP:PORT/api/route
+VITE_API_URL_VOICE=http://IP:PORT/api/convert_audio
+````
 
 ## 📥 Installation
 
