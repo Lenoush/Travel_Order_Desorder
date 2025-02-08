@@ -5,7 +5,7 @@
 **.ruff_cache/
 
 **.model
-**/*.csv
+# **/*.csv
 /config.py
 **/*.png
 
