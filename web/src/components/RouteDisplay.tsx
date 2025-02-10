@@ -13,10 +13,10 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
 
   const formattedResponses = responses.map((response) => {
 
-    const isModelValid = response.error_nlp === null;
+    const isModelValid = response.error_nlp.length === 0;
 
     if (!isModelValid) {
-      return `${response.IDsentence},${response.responsesmodel}`;
+      return `${response.IDsentence},${response.error_nlp.join(',')}`;
     }
 
     const routeModel = (response.responsesmodel).sort((a, b) => {
@@ -51,8 +51,9 @@ const RouteDisplay: React.FC<RouteDisplayProps> = ({ responses, hasInteracted })
       {responses.length > 0 ? (
         responses.map((response, responseIndex) => {
           const isModelValid = response.error_nlp.length === 0;
-          const isWayValid = Array.isArray(response.error_route) && response.error_route.every(err => err === null);
-
+          const isWayValid = Array.isArray(response.error_route) 
+            ? response.error_route.every(err => err === null) 
+            : true;
           const routeModel = isModelValid
             ? (response.responsesmodel as RouteItem[]).sort((a, b) => {
               const order = { DEPART: 1, CORRESPONDANCE: 2, ARRIVEE: 3 };

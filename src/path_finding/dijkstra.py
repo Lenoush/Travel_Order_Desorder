@@ -144,11 +144,11 @@ def get_fastest_route_for_city(G, commune_stations, departure_city, arrival_city
     arrival_stations = get_stations_for_city(commune_stations, arrival_city, G)
 
     best_route = None
-    error = None
+    error = []
     shortest_time = float("inf")
 
     if not departure_stations or not arrival_stations:
-        error = f"Aucune gare trouvée pour {departure_city if not departure_stations else arrival_city}"
+        error.append(f"Aucune gare trouvée pour {departure_city if not departure_stations else arrival_city}")
         return best_route, error
 
     for dep in departure_stations:
@@ -161,7 +161,10 @@ def get_fastest_route_for_city(G, commune_stations, departure_city, arrival_city
                     best_route = route
 
     if not best_route:
-        error = "Aucun trajet trouvé."
+        error.append("Aucun trajet trouvé.")
+    
+    if error == []:
+        error = None
 
     return best_route, error
 
